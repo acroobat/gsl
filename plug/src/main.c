@@ -23,10 +23,11 @@ int mpv_open_cplugin(mpv_handle *handle)
     
         while (1) {
             mpv_event *event = mpv_wait_event(handle, -1);
+
             char *result = NULL;
             mpv_get_property(handle, "stream-open-filename", MPV_FORMAT_STRING, &result);
             //printf("Got event: %d\n", event->event_id);
-            if(StartsWith(result, "game://")) { 
+            if (StartsWith(result, "game://")) { 
                 mpv_set_option_string(handle, "input-vo-keyboard", "no");
                mpv_set_option_string(handle, "terminal", "no");
                 result += 7;
@@ -36,16 +37,16 @@ int mpv_open_cplugin(mpv_handle *handle)
             //    char *stream = "";
             //mpv_set_property(handle, "stream-open-filename", MPV_FORMAT_STRING, &stream);
             }
+            //else
+             //   break;
             
-            if (event->event_id == MPV_EVENT_PAUSE)
-            {
-                const char *cmd[] = {"show-text", "pause", 0};
-              //  mpv_command(handle,testcmd);
-           //     printf("%s\n", result);
-            }
+          mpv_node mouse;
+          mpv_get_property(handle, "mouse-pos", MPV_FORMAT_NODE, &mouse);
+          printf("format=%d\n", (int)mouse.format);
+          mpv_free_node_contents(&mouse);
+            
             if (event->event_id == MPV_EVENT_SHUTDOWN)
                 break;
         }
         return 0;
     }
-
