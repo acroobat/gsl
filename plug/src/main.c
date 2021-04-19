@@ -1,4 +1,3 @@
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,21 +28,24 @@ int mpv_open_cplugin(mpv_handle *handle)
             //printf("Got event: %d\n", event->event_id);
             if (StartsWith(result, "game://")) { 
                 mpv_set_option_string(handle, "input-vo-keyboard", "no");
-               mpv_set_option_string(handle, "terminal", "no");
+                mpv_set_option_string(handle, "terminal", "no");
                 result += 7;
-              char testcmd[100];
+                char testcmd[100];
                 sprintf(testcmd, "moonlight stream -app %s", result);
                 system(testcmd);
+                char dt = malloc(sizeof(testcmd));
             //    char *stream = "";
             //mpv_set_property(handle, "stream-open-filename", MPV_FORMAT_STRING, &stream);
             }
             //else
              //   break;
             
-          mpv_node mouse;
-          mpv_get_property(handle, "mouse-pos", MPV_FORMAT_NODE, &mouse);
-          printf("format=%d\n", (int)mouse.format);
-          mpv_free_node_contents(&mouse);
+            memcpy(&result, "whatever", sizeof testcmd);
+            mpv_node mouse;
+            mpv_get_property(handle, "mouse-pos", MPV_FORMAT_NODE, &mouse);
+            printf("format=%d\n", (int)mouse.format);
+            mpv_free_node_contents(&mouse);
+            free(testcmd);
             
             if (event->event_id == MPV_EVENT_SHUTDOWN)
                 break;
