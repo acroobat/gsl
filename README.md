@@ -1,5 +1,5 @@
 WIP plugin for mpv
 
-`cd plug`
+`meson build`
 
-`cmake . && make && mv moonlight.so ~/.config/mpv/scripts`
+`ninja -C build && mv build/libmpv-moonlight.so ~/.config/mpv/scripts`
