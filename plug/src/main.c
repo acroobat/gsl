@@ -33,19 +33,19 @@ int mpv_open_cplugin(mpv_handle *handle)
                 char testcmd[100];
                 sprintf(testcmd, "moonlight stream -app %s", result);
                 system(testcmd);
-                char dt = malloc(sizeof(testcmd));
+                //char dt = malloc(sizeof(testcmd));
             //    char *stream = "";
             //mpv_set_property(handle, "stream-open-filename", MPV_FORMAT_STRING, &stream);
             }
             //else
              //   break;
             
-            memcpy(&result, "whatever", sizeof testcmd);
+            /*memcpy(&result, "whatever", sizeof testcmd);
             mpv_node mouse;
             mpv_get_property(handle, "mouse-pos", MPV_FORMAT_NODE, &mouse);
             printf("format=%d\n", (int)mouse.format);
             mpv_free_node_contents(&mouse);
-            free(testcmd);
+            free(testcmd);*/
             
             if (event->event_id == MPV_EVENT_SHUTDOWN)
                 break;
