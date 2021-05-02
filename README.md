@@ -1,5 +1,5 @@
 WIP plugin for mpv
 
-`meson build`
+`premake5 gmake`
 
-`ninja -C build && mv build/libmpv-moonlight.so ~/.config/mpv/scripts`
+`make && mv Debug/libmpv-moonlight.so ~/.config/mpv/scripts`
