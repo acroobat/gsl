@@ -1,18 +1,10 @@
--- premake5.lua
-workspace "Premake"
-   configurations { "Debug", "Release" }
+workspace "mainspace"
+   configurations { "liblight" }
 
-project "mpv-moonlight"
+project "light"
    kind "SharedLib"
    language "C"
    targetdir "%{cfg.buildcfg}"
 
-   files { "plug/src/**.h", "plug/src/**.c" }
-
-   filter "configurations:Debug"
-      defines { "DEBUG" }
---      symbols "On"
-
-   filter "configurations:Release"
-      defines { "NDEBUG" }
-      optimize "On"
+   files { "src/**.h", "src/**.c" }
+   includedirs "moonlight-common-c"
