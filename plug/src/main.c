@@ -1,3 +1,30 @@
+/*
+  Copyright (C) 2021 Damir Mukhametshin
+ 
+  Moonlight is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+ 
+  Moonlight is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+ 
+  You should have received a copy of the GNU General Public License
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+/*
+ * const char *var=
+ * typeof enum struct (space) var
+ * emp = (struct student*)
+ *     malloc(sizeof(struct student));
+ * printf("%d", emp->age);
+ * event->event_id  - 2 instead of 1
+ */
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,35 +44,23 @@ int system(const char *command);
 
 int mpv_open_cplugin(mpv_handle *handle)
     {
-        printf("Hello world from C plugin '%s'!\n", mpv_client_name(handle));
-
-    
         while (1) {
             mpv_event *event = mpv_wait_event(handle, -1);
 
-            char *result = NULL;
+            char* result = NULL;
             mpv_get_property(handle, "stream-open-filename", MPV_FORMAT_STRING, &result);
-            //printf("Got event: %d\n", event->event_id);
+            printf("%s\n", result);
             if (StartsWith(result, "game://")) { 
-                mpv_set_option_string(handle, "input-vo-keyboard", "no");
-                mpv_set_option_string(handle, "terminal", "no");
+            //    mpv_set_option_string(handle, "input-vo-keyboard", "no");
+            //    mpv_set_option_string(handle, "terminal", "no");
                 result += 7;
                 char testcmd[100];
                 sprintf(testcmd, "moonlight stream -app %s", result);
                 system(testcmd);
-                //char dt = malloc(sizeof(testcmd));
-            //    char *stream = "";
-            //mpv_set_property(handle, "stream-open-filename", MPV_FORMAT_STRING, &stream);
             }
+            //uncomment at the end
             //else
-             //   break;
-            
-            /*memcpy(&result, "whatever", sizeof testcmd);
-            mpv_node mouse;
-            mpv_get_property(handle, "mouse-pos", MPV_FORMAT_NODE, &mouse);
-            printf("format=%d\n", (int)mouse.format);
-            mpv_free_node_contents(&mouse);
-            free(testcmd);*/
+            //    break;
             
             if (event->event_id == MPV_EVENT_SHUTDOWN)
                 break;
