@@ -1,5 +1,11 @@
-WIP plugin for mpv
+# WIP liblight
+Fork of libgamestream (part of https://github.com/irtimmer/moonlight-embedded/)
 
-`premake5 gmake`
+<b>Requirements:</b>
+<ul>
+<li>moonlight-common-c</li>
+</ul>
 
-`make && mv Debug/libmpv-moonlight.so ~/.config/mpv/scripts`
+# WIP lightplug
+
+Cplugin for mpv
