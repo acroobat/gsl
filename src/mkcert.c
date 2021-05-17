@@ -1,16 +1,16 @@
 /*
- * Moonlight is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moonlight is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
+  Moonlight is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+ 
+  Moonlight is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+ 
+  You should have received a copy of the GNU General Public License
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "mkcert.h"
@@ -27,9 +27,9 @@
 #include <openssl/engine.h>
 #endif
 
-static const int NUM_BITS = 2048;
-static const int SERIAL = 0;
-static const int NUM_YEARS = 10;
+static const int num_bits = 2048;
+static const int serial = 0;
+static const int num_years = 10;
 
 int mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years);
 int add_ext(X509 *cert, int nid, char *value);
@@ -46,7 +46,7 @@ CERT_KEY_PAIR mkcert_generate() {
     OpenSSL_add_all_algorithms();
     ERR_load_crypto_strings();
 
-    mkcert(&x509, &pkey, NUM_BITS, SERIAL, NUM_YEARS);
+    mkcert(&x509, &pkey, num_bits, serial, num_years);
 
     p12 = PKCS12_create("limelight", "GameStream", pkey, x509, NULL, 0, 0, 0, 0, 0);
 
@@ -60,25 +60,25 @@ CERT_KEY_PAIR mkcert_generate() {
     return (CERT_KEY_PAIR) {x509, pkey, p12};
 }
 
-void mkcert_free(CERT_KEY_PAIR certKeyPair) {
-    X509_free(certKeyPair.x509);
-    EVP_PKEY_free(certKeyPair.pkey);
-    PKCS12_free(certKeyPair.p12);
+void mkcert_free(CERT_KEY_PAIR certkeypair) {
+    X509_free(certkeypair.x509);
+    EVP_PKEY_free(certkeypair.pkey);
+    PKCS12_free(certkeypair.p12);
 }
 
-void mkcert_save(const char* certFile, const char* p12File, const char* keyPairFile, CERT_KEY_PAIR certKeyPair) {
-    FILE* certFilePtr = fopen(certFile, "w");
-    FILE* keyPairFilePtr = fopen(keyPairFile, "w");
-    FILE* p12FilePtr = fopen(p12File, "wb");
+void mkcert_save(const char* certfile, const char* p12file, const char* keypairfile, CERT_KEY_PAIR certkeypair) {
+    FILE* certfileptr = fopen(certfile, "w");
+    FILE* keypairfileptr = fopen(keypairfile, "w");
+    FILE* p12fileptr = fopen(p12file, "wb");
 
     //TODO: error check
-    PEM_write_PrivateKey(keyPairFilePtr, certKeyPair.pkey, NULL, NULL, 0, NULL, NULL);
-    PEM_write_X509(certFilePtr, certKeyPair.x509);
-    i2d_PKCS12_fp(p12FilePtr, certKeyPair.p12);
+    PEM_write_PrivateKey(keypairfile_ptr, certkeypair.pkey, NULL, NULL, 0, NULL, NULL);
+    PEM_write_X509(certfileptr, certkeypair.x509);
+    i2d_PKCS12_fp(p12fileptr, certkeypair.p12);
 
-    fclose(p12FilePtr);
-    fclose(certFilePtr);
-    fclose(keyPairFilePtr);
+    fclose(p12fileptr);
+    fclose(certfileptr);
+    fclose(keypairfileptr);
 }
 
 int mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years) {
