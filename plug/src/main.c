@@ -15,15 +15,14 @@
   along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /*
  * const char *var=
- * typeof enum struct (space) var
- * emp = (struct student*)
- *     malloc(sizeof(struct student));
- * printf("%d", emp->age);
+ * emp = (struct student*); malloc(sizeof(struct student)); - 1 action
  * event->event_id  - 2 instead of 1
+ * #define _gs_ok 0
  */
+
+/*<-struct|variable->*/
 
 #include <stddef.h>
 #include <stdio.h>
@@ -32,37 +31,36 @@
 #include <string.h>
 
 #include <mpv/client.h>
+//#include <liblight/client.h>
 
 bool StartsWith(const char *a, const char *b)
-{
-   if(strncmp(a, b, strlen(b)) == 0) return 1;
-   return 0;
-}
+    {
+        if(strncmp(a, b, strlen(b)) == 0) return 1;
+        return 0;
+    }
 
-int system(const char *command);
-
-
-int mpv_open_cplugin(mpv_handle *handle)
+int mpv_open_cplugin(mpv_handle /*<-struct|variable->*/ *handle)
     {
         while (1) {
-            mpv_event *event = mpv_wait_event(handle, -1);
-
-            char* result = NULL;
-            mpv_get_property(handle, "stream-open-filename", MPV_FORMAT_STRING, &result);
-            printf("%s\n", result);
-            if (StartsWith(result, "game://")) { 
+            mpv_event /*<-struct|variable->*/ *event = mpv_wait_event(handle, -1);
+            //char* result = NULL;
+            char *result = NULL;
+            mpv_get_property(handle, "stream-open-filename", 1, &result);
+            if (StartsWith(result, "game://")) 
+                { 
+            printf("%s\n", result);;
             //    mpv_set_option_string(handle, "input-vo-keyboard", "no");
             //    mpv_set_option_string(handle, "terminal", "no");
                 result += 7;
                 char testcmd[100];
                 sprintf(testcmd, "moonlight stream -app %s", result);
                 system(testcmd);
-            }
+                }
             //uncomment at the end
             //else
             //    break;
             
-            if (event->event_id == MPV_EVENT_SHUTDOWN)
+            if (event->event_id == 1)
                 break;
         }
         return 0;
