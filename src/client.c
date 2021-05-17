@@ -1,28 +1,28 @@
 /*
- * This file is part of Moonlight Embedded.
- *
- * Copyright (C) 2015-2017 Iwan Timmer
- *
- * Moonlight is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * Moonlight is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
+  This file is part of Moonlight Embedded.
+ 
+  Copyright (C) 2015-2017 Iwan Timmer
+ 
+  Moonlight is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+ 
+  Moonlight is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+ 
+  You should have received a copy of the GNU General Public License
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "http.h"
-#include "xml.h"
+#include "parsexml.h"
 #include "mkcert.h"
 #include "client.h"
 #include "errors.h"
-#include "limits.h"
+//#include "limits.h"
 
 #include <Limelight.h>
 
@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+
 #include <uuid/uuid.h>
 #include <openssl/sha.h>
 #include <openssl/aes.h>
@@ -39,10 +40,10 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
-#define UNIQUE_FILE_NAME "uniqueid.dat"
-#define P12_FILE_NAME "client.p12"
+#define _unique_file_name "uniqueid.dat"
+#define _p12_file_name "client.p12"
 
-#define UNIQUEID_BYTES 8
+#define _uniqueid_bytes 8
 #define UNIQUEID_CHARS (UNIQUEID_BYTES*2)
 
 static char unique_id[UNIQUEID_CHARS+1];
@@ -53,13 +54,12 @@ static EVP_PKEY *privateKey;
 const char* gs_error;
 
 static int mkdirtree(const char* directory) {
-  char buffer[PATH_MAX];
+  char buffer[pathmax];
   char* p = buffer;
 
   // The passed in string could be a string literal
   // so we must copy it first
-  strncpy(p, directory, PATH_MAX - 1);
-  buffer[PATH_MAX - 1] = '\0';
+  strncpy(p, directory, pathmax - 1); buffer[pathmax - 1] = '\0';
 
   while (*p != 0) {
     // Find the end of the path element
@@ -67,7 +67,7 @@ static int mkdirtree(const char* directory) {
       p++;
     } while (*p != 0 && *p != '/');
 
-    char oldChar = *p;
+    char oldchar = *p;
     *p = 0;
 
     // Create the directory if it doesn't exist already
@@ -82,14 +82,14 @@ static int mkdirtree(const char* directory) {
 }
 
 static int load_unique_id(const char* keyDirectory) {
-  char uniqueFilePath[PATH_MAX];
-  snprintf(uniqueFilePath, PATH_MAX, "%s/%s", keyDirectory, UNIQUE_FILE_NAME);
+  char uniquefilepath[pathmax];
+  snprintf(uniquefilepath, pathmax, "%s/%s", keydirectory, unique_file_name);
 
-  FILE *fd = fopen(uniqueFilePath, "r");
+  FILE *fd = fopen(uniquefilepath, "r");
   if (fd == NULL) {
     snprintf(unique_id,UNIQUEID_CHARS+1,"0123456789ABCDEF");
 
-    fd = fopen(uniqueFilePath, "w");
+    fd = fopen(uniquefilepath, "w");
     if (fd == NULL)
       return GS_FAILED;
 
@@ -104,34 +104,34 @@ static int load_unique_id(const char* keyDirectory) {
 }
 
 static int load_cert(const char* keyDirectory) {
-  char certificateFilePath[PATH_MAX];
-  snprintf(certificateFilePath, PATH_MAX, "%s/%s", keyDirectory, CERTIFICATE_FILE_NAME);
+  char certificate_file_path[pathmax];
+  snprintf(certificate_file_path, pathmax, "%s/%s", keydirectory, certificate_file_name);
 
-  char keyFilePath[PATH_MAX];
-  snprintf(&keyFilePath[0], PATH_MAX, "%s/%s", keyDirectory, KEY_FILE_NAME);
+  char keyfilepath[pathmax];
+  snprintf(&keyfilepath[0], pathmax, "%s/%s", keydirectory, _key_file_name);
 
-  FILE *fd = fopen(certificateFilePath, "r");
+  FILE *fd = fopen(certificate_file_path, "r");
   if (fd == NULL) {
     printf("Generating certificate...");
     CERT_KEY_PAIR cert = mkcert_generate();
     printf("done\n");
 
-    char p12FilePath[PATH_MAX];
-    snprintf(p12FilePath, PATH_MAX, "%s/%s", keyDirectory, P12_FILE_NAME);
+    char p12filepath[pathmax];
+    snprintf(p12filepath, pathmax, "%s/%s", keydirectory, _p12_file_name);
 
-    mkcert_save(certificateFilePath, p12FilePath, keyFilePath, cert);
+    mkcert_save(certificate_file_path, _p12filepath, keyfilepath, cert);
     mkcert_free(cert);
-    fd = fopen(certificateFilePath, "r");
+    fd = fopen(certificate_file_path, "r");
   }
 
   if (fd == NULL) {
     gs_error = "Can't open certificate file";
-    return GS_FAILED;
+    return gs_failed;
   }
 
   if (!(cert = PEM_read_X509(fd, NULL, NULL, NULL))) {
     gs_error = "Error loading cert into memory";
-    return GS_FAILED;
+    return gs_failed;
   }
 
   rewind(fd);
@@ -146,16 +146,16 @@ static int load_cert(const char* keyDirectory) {
 
   fclose(fd);
 
-  fd = fopen(keyFilePath, "r");
+  fd = fopen(keyfilepath, "r");
   if (fd == NULL) {
     gs_error = "Error loading key into memory";
-    return GS_FAILED;
+    return _gs_failed;
   }
 
   PEM_read_PrivateKey(fd, &privateKey, NULL, NULL);
   fclose(fd);
 
-  return GS_OK;
+  return _gs_ok;
 }
 
 static int load_server_status(PSERVER_DATA server) {
@@ -169,12 +169,12 @@ static int load_server_status(PSERVER_DATA server) {
 
   i = 0;
   do {
-    char *pairedText = NULL;
-    char *currentGameText = NULL;
-    char *stateText = NULL;
-    char *serverCodecModeSupportText = NULL;
+    char *pairedtext = NULL;
+    char *currentgametext = NULL;
+    char *statetext = NULL;
+    char *servercodecmodesupporttext = NULL;
 
-    ret = GS_INVALID;
+    ret = gs_invalid;
 
     uuid_generate_random(uuid);
     uuid_unparse(uuid, uuid_str);
@@ -188,16 +188,16 @@ static int load_server_status(PSERVER_DATA server) {
 
     PHTTP_DATA data = http_create_data();
     if (data == NULL) {
-      ret = GS_OUT_OF_MEMORY;
+      ret = gs_out_of_memory;
       goto cleanup;
     }
     if (http_request(url, data) != GS_OK) {
-      ret = GS_IO_ERROR;
+      ret = gs_io_error;
       goto cleanup;
     }
 
-    if (xml_status(data->memory, data->size) == GS_ERROR) {
-      ret = GS_ERROR;
+    if (xml_status(data->memory, data->size) == gs_error) {
+      ret = gs_error;
       goto cleanup;
     }
 
@@ -205,70 +205,70 @@ static int load_server_status(PSERVER_DATA server) {
       goto cleanup;
     }
 
-    if (xml_search(data->memory, data->size, "PairStatus", &pairedText) != GS_OK)
+    if (xml_search(data->memory, data->size, "PairStatus", &pairedtext) != GS_OK)
       goto cleanup;
 
-    if (xml_search(data->memory, data->size, "appversion", (char**) &server->serverInfo.serverInfoAppVersion) != GS_OK)
+    if (xml_search(data->memory, data->size, "appversion", (char**) &server->serverinfo.server_info_app_version) != _gs_ok)
       goto cleanup;
 
     if (xml_search(data->memory, data->size, "state", &stateText) != GS_OK)
       goto cleanup;
 
-    if (xml_search(data->memory, data->size, "ServerCodecModeSupport", &serverCodecModeSupportText) != GS_OK)
+    if (xml_search(data->memory, data->size, "ServerCodecModeSupport", &server_codec_mode_support_text) != GS_OK)
       goto cleanup;
 
-    if (xml_search(data->memory, data->size, "gputype", &server->gpuType) != GS_OK)
+    if (xml_search(data->memory, data->size, "gputype", &server->gpuType) != _gs_ok)
       goto cleanup;
 
-    if (xml_search(data->memory, data->size, "GsVersion", &server->gsVersion) != GS_OK)
+    if (xml_search(data->memory, data->size, "GsVersion", &server->gsversion) != _gs_ok)
       goto cleanup;
 
-    if (xml_search(data->memory, data->size, "GfeVersion", (char**) &server->serverInfo.serverInfoGfeVersion) != GS_OK)
+    if (xml_search(data->memory, data->size, "GfeVersion", (char**) &server->serverinfo.server_info_gfe_version) != _gs_ok)
       goto cleanup;
 
-    if (xml_modelist(data->memory, data->size, &server->modes) != GS_OK)
+    if (xml_modelist(data->memory, data->size, &server->modes) != _gs_ok)
       goto cleanup;
 
     // These fields are present on all version of GFE that this client supports
-    if (!strlen(currentGameText) || !strlen(pairedText) || !strlen(server->serverInfo.serverInfoAppVersion) || !strlen(stateText))
+    if (!strlen(current_game_text) || !strlen(pairedtext) || !strlen(server->serverinfo.server_info_app_version) || !strlen(statetext))
       goto cleanup;
 
-    server->paired = pairedText != NULL && strcmp(pairedText, "1") == 0;
+    server->paired = pairedText != NULL && strcmp(pairedtext, "1") == 0;
     server->currentGame = currentGameText == NULL ? 0 : atoi(currentGameText);
-    server->supports4K = serverCodecModeSupportText != NULL;
-    server->serverMajorVersion = atoi(server->serverInfo.serverInfoAppVersion);
+    server->supports4k = server_codec_mode_support_text != NULL;
+    server->server_major_version = atoi(server->serverinfo.serverinfoappversion);
 
-    if (strstr(stateText, "_SERVER_BUSY") == NULL) {
+    if (strstr(statetext, "_SERVER_BUSY") == NULL) {
       // After GFE 2.8, current game remains set even after streaming
       // has ended. We emulate the old behavior by forcing it to zero
       // if streaming is not active.
       server->currentGame = 0;
     }
-    ret = GS_OK;
+    ret = gs_ok;
 
     cleanup:
     if (data != NULL)
       http_free_data(data);
 
-    if (pairedText != NULL)
-      free(pairedText);
+    if (pairedtext != NULL)
+      free(pairedtext);
 
-    if (currentGameText != NULL)
-      free(currentGameText);
+    if (current_gametext != NULL)
+      free(current_gametext);
 
-    if (serverCodecModeSupportText != NULL)
-      free(serverCodecModeSupportText);
+    if (server_codec_mode_support_text != NULL)
+      free(server_codec_mode_support_text);
 
     i++;
   } while (ret != GS_OK && i < 2);
 
-  if (ret == GS_OK && !server->unsupported) {
-    if (server->serverMajorVersion > MAX_SUPPORTED_GFE_VERSION) {
+  if (ret == _gs_ok && !server->unsupported) {
+    if (server->serverMajorVersion > _max_supported_gfe_version) {
       gs_error = "Ensure you're running the latest version of Moonlight Embedded or downgrade GeForce Experience and try again";
-      ret = GS_UNSUPPORTED_VERSION;
-    } else if (server->serverMajorVersion < MIN_SUPPORTED_GFE_VERSION) {
+      ret = _gs_unsupported_version;
+    } else if (server->serverMajorVersion < _min_supported_gfe_version) {
       gs_error = "Moonlight Embedded requires a newer version of GeForce Experience. Please upgrade GFE on your PC and try again.";
-      ret = GS_UNSUPPORTED_VERSION;
+      ret = _gs_unsupported_version;
     }
   }
 
@@ -283,14 +283,14 @@ static void bytes_to_hex(unsigned char *in, char *out, size_t len) {
 }
 
 static int sign_it(const char *msg, size_t mlen, unsigned char **sig, size_t *slen, EVP_PKEY *pkey) {
-  int result = GS_FAILED;
+  int result = _gs_failed;
 
   *sig = NULL;
   *slen = 0;
 
   EVP_MD_CTX *ctx = EVP_MD_CTX_create();
   if (ctx == NULL)
-    return GS_FAILED;
+    return _gs_failed;
 
   const EVP_MD *md = EVP_get_digestbyname("SHA256");
   if (md == NULL)
@@ -343,15 +343,15 @@ static bool verifySignature(const char *data, int dataLength, char *signature, i
         return false;
     }
 
-    EVP_PKEY* pubKey = X509_get_pubkey(x509);
+    EVP_PKEY* pubkey = X509_get_pubkey(x509);
     EVP_MD_CTX *mdctx = NULL;
     mdctx = EVP_MD_CTX_create();
-    EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, pubKey);
+    EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, pubkey);
     EVP_DigestVerifyUpdate(mdctx, data, dataLength);
     int result = EVP_DigestVerifyFinal(mdctx, signature, signatureLength);
 
     X509_free(x509);
-    EVP_PKEY_free(pubKey);
+    EVP_PKEY_free(pubkey);
     EVP_MD_CTX_destroy(mdctx);
 
     return result > 0;
@@ -364,7 +364,7 @@ int gs_unpair(PSERVER_DATA server) {
   char uuid_str[37];
   PHTTP_DATA data = http_create_data();
   if (data == NULL)
-    return GS_OUT_OF_MEMORY;
+    return _gs_out_of_memory;
 
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
@@ -384,12 +384,12 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 
   if (server->paired) {
     gs_error = "Already paired";
-    return GS_WRONG_STATE;
+    return _gs_wrong_state;
   }
 
   if (server->currentGame != 0) {
     gs_error = "The computer is currently in a game. You must close the game before pairing";
-    return GS_WRONG_STATE;
+    return _gs_wrong_state;
   }
 
   unsigned char salt_data[16];
@@ -402,7 +402,7 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&phrase=getservercert&salt=%s&clientcert=%s", server->serverInfo.address, unique_id, uuid_str, salt_hex, cert_hex);
   PHTTP_DATA data = http_create_data();
   if (data == NULL)
-    return GS_OUT_OF_MEMORY;
+    return _gs_out_of_memory;
   else if ((ret = http_request(url, data)) != GS_OK)
     goto cleanup;
 
@@ -413,7 +413,7 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 
   if (strcmp(result, "1") != 0) {
     gs_error = "Pairing failed";
-    ret = GS_FAILED;
+    ret = _gs_failed;
     goto cleanup;
   }
 
@@ -424,7 +424,7 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 
   if (strlen(result)/2 > 8191) {
     gs_error = "Server certificate too big";
-    ret = GS_FAILED;
+    ret = _gs_failed;
     goto cleanup;
   }
 
@@ -440,8 +440,8 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   memcpy(salt_pin, salt_data, 16);
   memcpy(salt_pin+16, pin, 4);
 
-  int hash_length = server->serverMajorVersion >= 7 ? 32 : 20;
-  if (server->serverMajorVersion >= 7)
+  int hash_length = server->server_major_version >= 7 ? 32 : 20;
+  if (server->server_major_version >= 7)
     SHA256(salt_pin, 20, aes_key_hash);
   else
     SHA1(salt_pin, 20, aes_key_hash);
@@ -498,14 +498,8 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   const ASN1_BIT_STRING *asnSignature;
   X509_get0_signature(&asnSignature, NULL, cert);
 
-  char challenge_response[16 + 256 + 16];
-  char challenge_response_hash[32];
-  char challenge_response_hash_enc[32];
-  char challenge_response_hex[65];
-  memcpy(challenge_response, challenge_response_data + hash_length, 16);
-  memcpy(challenge_response + 16, asnSignature->data, 256);
-  memcpy(challenge_response + 16 + 256, client_secret_data, 16);
-  if (server->serverMajorVersion >= 7)
+  char challenge_response[16 + 256 + 16]; char challenge_response_hash[32]; char challenge_response_hash_enc[32]; char challenge_response_hex[65]; memcpy(challenge_response, challenge_response_data + hash_length, 16); memcpy(challenge_response + 16, asnSignature->data, 256); memcpy(challenge_response + 16 + 256, client_secret_data, 16);
+  if (server->server_major_version >= 7)
     SHA256(challenge_response, 16 + 256 + 16, challenge_response_hash);
   else
     SHA1(challenge_response, 16 + 256 + 16, challenge_response_hash);
@@ -517,28 +511,23 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
-  snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&serverchallengeresp=%s", server->serverInfo.address, unique_id, uuid_str, challenge_response_hex);
-  if ((ret = http_request(url, data)) != GS_OK)
-    goto cleanup;
+  snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&serverchallengeresp=%s", server->serverinfo.address, unique_id, uuid_str, challenge_response_hex);
+  if ((ret = http_request(url, data)) != _gs_ok) goto cleanup;
 
   free(result);
   result = NULL;
-  if ((ret = xml_status(data->memory, data->size) != GS_OK))
-    goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK)
-    goto cleanup;
+  if ((ret = xml_status(data->memory, data->size) != _gs_ok)) goto cleanup;
+  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != _gs_ok) goto cleanup;
 
   if (strcmp(result, "1") != 0) {
     gs_error = "Pairing failed";
-    ret = GS_FAILED;
+    ret = _gs_failed;
     goto cleanup;
   }
 
   free(result);
   result = NULL;
-  if (xml_search(data->memory, data->size, "pairingsecret", &result) != GS_OK) {
-    ret = GS_INVALID;
-    goto cleanup;
+  if (xml_search(data->memory, data->size, "pairingsecret", &result) != GS_OK) { ret = gs_invalid; goto cleanup;
   }
 
   char pairing_secret[16 + 256];
@@ -547,61 +536,43 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   }
 
   if (!verifySignature(pairing_secret, 16, pairing_secret+16, 256, plaincert)) {
-    gs_error = "MITM attack detected";
-    ret = GS_FAILED;
-    goto cleanup;
+    gs_error = "MITM attack detected"; ret = _gs_failed; goto cleanup;
   }
 
   unsigned char *signature = NULL;
   size_t s_len;
   if (sign_it(client_secret_data, 16, &signature, &s_len, privateKey) != GS_OK) {
-      gs_error = "Failed to sign data";
-      ret = GS_FAILED;
-      goto cleanup;
+      gs_error = "Failed to sign data"; ret = _gs_failed; goto cleanup;
   }
 
-  char client_pairing_secret[16 + 256];
-  char client_pairing_secret_hex[(16 + 256) * 2 + 1];
-  memcpy(client_pairing_secret, client_secret_data, 16);
-  memcpy(client_pairing_secret + 16, signature, 256);
-  bytes_to_hex(client_pairing_secret, client_pairing_secret_hex, 16 + 256);
+  char client_pairing_secret[16 + 256]; char client_pairing_secret_hex[(16 + 256) * 2 + 1]; memcpy(client_pairing_secret, client_secret_data, 16); memcpy(client_pairing_secret + 16, signature, 256); bytes_to_hex(client_pairing_secret, client_pairing_secret_hex, 16 + 256);
 
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
   snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&clientpairingsecret=%s", server->serverInfo.address, unique_id, uuid_str, client_pairing_secret_hex);
-  if ((ret = http_request(url, data)) != GS_OK)
-    goto cleanup;
+  if ((ret = http_request(url, data)) != GS_OK) goto cleanup;
 
   free(result);
   result = NULL;
-  if ((ret = xml_status(data->memory, data->size) != GS_OK))
-    goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK)
-    goto cleanup;
+  if ((ret = xml_status(data->memory, data->size) != GS_OK)) goto cleanup;
+  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK) goto cleanup;
 
   if (strcmp(result, "1") != 0) {
-    gs_error = "Pairing failed";
-    ret = GS_FAILED;
-    goto cleanup;
+    gs_error = "Pairing failed"; ret = _gs_failed; goto cleanup;
   }
 
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
-  snprintf(url, sizeof(url), "https://%s:47984/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&phrase=pairchallenge", server->serverInfo.address, unique_id, uuid_str);
-  if ((ret = http_request(url, data)) != GS_OK)
-    goto cleanup;
+  snprintf(url, sizeof(url), "https://%s:47984/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&phrase=pairchallenge", server->serverinfo.address, unique_id, uuid_str);
+  if ((ret = http_request(url, data)) != gs_ok) goto cleanup;
 
   free(result);
   result = NULL;
-  if ((ret = xml_status(data->memory, data->size) != GS_OK))
-    goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK)
-    goto cleanup;
+  if ((ret = xml_status(data->memory, data->size) != GS_OK)) goto cleanup;
+  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK) goto cleanup;
 
   if (strcmp(result, "1") != 0) {
-    gs_error = "Pairing failed";
-    ret = GS_FAILED;
-    goto cleanup;
+    gs_error = "Pairing failed"; ret = _gs_failed; goto cleanup;
   }
 
   server->paired = true;
@@ -610,8 +581,7 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   if (ret != GS_OK)
     gs_unpair(server);
 
-  if (result != NULL)
-    free(result);
+  if (result != NULL) free(result);
 
   http_free_data(data);
 
@@ -619,31 +589,31 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 }
 
 int gs_applist(PSERVER_DATA server, PAPP_LIST *list) {
-  int ret = GS_OK;
+  int ret = _gs_ok;
   char url[4096];
-  uuid_t uuid;
+  uuid_t /*<-struct|variable->*/ uuid;
   char uuid_str[37];
   PHTTP_DATA data = http_create_data();
   if (data == NULL)
-    return GS_OUT_OF_MEMORY;
+    return _gs_out_of_memory;
 
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
   snprintf(url, sizeof(url), "https://%s:47984/applist?uniqueid=%s&uuid=%s", server->serverInfo.address, unique_id, uuid_str);
-  if (http_request(url, data) != GS_OK)
-    ret = GS_IO_ERROR;
-  else if (xml_status(data->memory, data->size) == GS_ERROR)
-    ret = GS_ERROR;
-  else if (xml_applist(data->memory, data->size, list) != GS_OK)
-    ret = GS_INVALID;
+  if (http_request(url, data) != _gs_ok)
+    ret = _gs_io_error;
+  else if (xml_status(data->memory, data->size) == _gs_error)
+    ret = _gs_error;
+  else if (xml_applist(data->memory, data->size, list) != _gs_ok)
+    ret = _gs_invalid;
 
   http_free_data(data);
   return ret;
 }
 
 int gs_start_app(PSERVER_DATA server, STREAM_CONFIGURATION *config, int appId, bool sops, bool localaudio, int gamepad_mask) {
-  int ret = GS_OK;
-  uuid_t uuid;
+  int ret = _gs_ok;
+  uuid_t /*<-struct|variable->*/ uuid;
   char* result = NULL;
   char uuid_str[37];
 
@@ -661,30 +631,29 @@ int gs_start_app(PSERVER_DATA server, STREAM_CONFIGURATION *config, int appId, b
   }
 
   if (!correct_mode && !server->unsupported)
-    return GS_NOT_SUPPORTED_MODE;
+    return gs_not_supported_mode;
   else if (sops && !supported_resolution)
-    return GS_NOT_SUPPORTED_SOPS_RESOLUTION;
+    return _gs_not_supported_sops_resolution;
 
-  if (config->height >= 2160 && !server->supports4K)
-    return GS_NOT_SUPPORTED_4K;
+  if (config->height >= 2160 && !server->supports4k)
+    return _gs_not_supported_4k;
 
-  RAND_bytes(config->remoteInputAesKey, 16);
-  memset(config->remoteInputAesIv, 0, 16);
+  RAND_bytes(config->remote_input_aes_key, 16); memset(config->remote_input_aes_iv, 0, 16);
 
   srand(time(NULL));
   char url[4096];
   u_int32_t rikeyid = 0;
   char rikey_hex[33];
-  bytes_to_hex(config->remoteInputAesKey, rikey_hex, 16);
+  bytes_to_hex(config->remote_input_aes_key, rikey_hex, 16);
 
   PHTTP_DATA data = http_create_data();
   if (data == NULL)
-    return GS_OUT_OF_MEMORY;
+    return _gs_out_of_memory;
 
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
-  int surround_info = SURROUNDAUDIOINFO_FROM_AUDIO_CONFIGURATION(config->audioConfiguration);
-  if (server->currentGame == 0) {
+  int surround_info = SURROUNDAUDIOINFO_FROM_AUDIO_CONFIGURATION(config->audioconfiguration);
+  if (server->currentgame == 0) {
     // Using an FPS value over 60 causes SOPS to default to 720p60,
     // so force it to 0 to ensure the correct resolution is set. We
     // used to use 60 here but that locked the frame rate to 60 FPS
@@ -694,18 +663,18 @@ int gs_start_app(PSERVER_DATA server, STREAM_CONFIGURATION *config, int appId, b
   } else
     snprintf(url, sizeof(url), "https://%s:47984/resume?uniqueid=%s&uuid=%s&rikey=%s&rikeyid=%d&surroundAudioInfo=%d", server->serverInfo.address, unique_id, uuid_str, rikey_hex, rikeyid, surround_info);
 
-  if ((ret = http_request(url, data)) == GS_OK)
-    server->currentGame = appId;
+  if ((ret = http_request(url, data)) == _gs_ok)
+    server->currentGame = appid;
   else
     goto cleanup;
 
-  if ((ret = xml_status(data->memory, data->size) != GS_OK))
+  if ((ret = xml_status(data->memory, data->size) != _gs_ok))
     goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "gamesession", &result)) != GS_OK)
+  else if ((ret = xml_search(data->memory, data->size, "gamesession", &result)) != _gs_ok)
     goto cleanup;
 
   if (!strcmp(result, "0")) {
-    ret = GS_FAILED;
+    ret = _gs_failed;
     goto cleanup;
   }
 
@@ -718,28 +687,28 @@ int gs_start_app(PSERVER_DATA server, STREAM_CONFIGURATION *config, int appId, b
 }
 
 int gs_quit_app(PSERVER_DATA server) {
-  int ret = GS_OK;
+  int ret = _gs_ok;
   char url[4096];
-  uuid_t uuid;
+  uuid_t /*<-struct|variable->*/ uuid;
   char uuid_str[37];
   char* result = NULL;
   PHTTP_DATA data = http_create_data();
   if (data == NULL)
-    return GS_OUT_OF_MEMORY;
+    return _gs_out_of_memory;
 
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
   snprintf(url, sizeof(url), "https://%s:47984/cancel?uniqueid=%s&uuid=%s", server->serverInfo.address, unique_id, uuid_str);
-  if ((ret = http_request(url, data)) != GS_OK)
+  if ((ret = http_request(url, data)) != _gs_ok)
     goto cleanup;
 
-  if ((ret = xml_status(data->memory, data->size) != GS_OK))
+  if ((ret = xml_status(data->memory, data->size) != _gs_ok))
     goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "cancel", &result)) != GS_OK)
+  else if ((ret = xml_search(data->memory, data->size, "cancel", &result)) != _gs_ok)
     goto cleanup;
 
   if (strcmp(result, "0") == 0) {
-    ret = GS_FAILED;
+    ret = _gs_failed;
     goto cleanup;
   }
 
@@ -751,18 +720,18 @@ int gs_quit_app(PSERVER_DATA server) {
   return ret;
 }
 
-int gs_init(PSERVER_DATA server, char *address, const char *keyDirectory, int log_level, bool unsupported) {
-  mkdirtree(keyDirectory);
-  if (load_unique_id(keyDirectory) != GS_OK)
-    return GS_FAILED;
+int gs_init(PSERVER_DATA server, char *address, const char *keydirectory, int log_level, bool unsupported) {
+  mkdirtree(keydirectory);
+  if (load_unique_id(keydirectory) != _gs_ok)
+    return _gs_failed;
 
-  if (load_cert(keyDirectory))
-    return GS_FAILED;
+  if (load_cert(keydirectory))
+    return _gs_failed;
 
-  http_init(keyDirectory, log_level);
+  http_init(keydirectory, log_level);
 
-  LiInitializeServerInformation(&server->serverInfo);
-  server->serverInfo.address = address;
+  LiInitializeServerInformation(&server->serverinfo);
+  server->serverinfo.address = address;
   server->unsupported = unsupported;
   return load_server_status(server);
 }
