@@ -20,6 +20,7 @@
  * event->event_id  - 2 in 1
  * #define _gs_ok 0
  * tabs
+ * FunctionInFunction
  */
 
 /*<-struct|variable->*/
@@ -39,26 +40,26 @@ bool StartsWith(const char *a, const char *b) {
 }
 
 int mpv_open_cplugin(mpv_handle /*<-struct|variable->*/ *handle) {
-        while (1) {
-            mpv_event /*<-struct|variable->*/ *event = mpv_wait_event(handle, -1);
-            //char* result = NULL;
-            char *result = NULL;
-            mpv_get_property(handle, "stream-open-filename", 1, &result);
-            if (StartsWith(result, "game://")) { 
-            printf("%s\n", result);
-            //    mpv_set_option_string(handle, "input-vo-keyboard", "no");
-            //    mpv_set_option_string(handle, "terminal", "no");
-                result += 7;
-                char testcmd[100];
-                sprintf(testcmd, "moonlight stream -app %s", result);
-                system(testcmd);
-            }
-            //uncomment at the end
-            //else
-            //    break;
-            
-            if (event->event_id == 1)
-                break;
+    while (1) {
+        mpv_event /*<-struct|variable->*/ *event = mpv_wait_event(handle, -1);
+        //char* result = NULL;
+        char *result = NULL;
+        mpv_get_property(handle, "stream-open-filename", 1, &result);
+        if (StartsWith(result, "game://")) { 
+        printf("%s\n", result);
+        //    mpv_set_option_string(handle, "input-vo-keyboard", "no");
+        //    mpv_set_option_string(handle, "terminal", "no");
+            result += 7;
+            char testcmd[100];
+            sprintf(testcmd, "moonlight stream -app %s", result);
+            system(testcmd);
         }
+        //uncomment at the end
+        //else
+        //    break;
+        
+        if (event->event_id == 1)
+            break;
+    }
     return 0;
 }
