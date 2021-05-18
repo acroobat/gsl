@@ -1,5 +1,5 @@
 /*
-  This file is part of Moonlight Embedded.
+//This file is part of Moonlight Embedded.
  
   Copyright (C) 2015 Iwan Timmer
  
@@ -21,16 +21,16 @@
 #include <stdio.h>
 
 typedef struct _APP_LIST {
-  char* name;
-  int id;
-  struct _APP_LIST *next;
+    char* name;
+    int id;
+    struct _APP_LIST *next;
 } APP_LIST, *PAPP_LIST;
 
 typedef struct _DISPLAY_MODE {
-  unsigned int height;
-  unsigned int width;
-  unsigned int refresh;
-  struct _DISPLAY_MODE *next;
+    unsigned int height;
+    unsigned int width;
+    unsigned int refresh;
+    struct _DISPLAY_MODE *next;
 } DISPLAY_MODE, *PDISPLAY_MODE;
 
 int xml_search(char* data, size_t len, char* node, char** result);

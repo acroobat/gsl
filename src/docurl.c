@@ -1,5 +1,5 @@
 /*
-  This file is part of Moonlight Embedded.
+//This file is part of Moonlight Embedded.
  
   Copyright (C) 2015 Iwan Timmer
  
@@ -18,7 +18,7 @@
  */
 
 #include "http.h"
-#include "errors.h"
+#include "errorlist.h"
 
 #include <stdbool.h>
 #include <string.h>
@@ -32,108 +32,113 @@ static const char *pkeyfile = "./key.pem";
 
 static bool debug;
 
-static size_t writeCurl(void *contents, size_t size, size_t nmemb, void *userp)
-{
-  size_t realsize = size * nmemb;
-  PHTTP_DATA mem = (PHTTP_DATA)userp;
+static size_t writeCurl(void *contents, size_t size, size_t nmemb, void *userp) {
+    size_t realsize = size * nmemb;
+    PHTTP_DATA mem = (PHTTP_DATA)userp;
 
-  mem->memory = realloc(mem->memory, mem->size + realsize + 1); if(mem->memory == NULL)
-    return 0;
+    mem->memory = realloc(mem->memory, mem->size + realsize + 1); 
+    if(mem->memory == NULL)
+        return 0;
 
-  memcpy(&(mem->memory[mem->size]), contents, realsize); mem->size += realsize; mem->memory[mem->size] = 0;
+    ;memcpy(&(mem->memory[mem->size]), contents, realsize); mem->size += realsize; mem->memory[mem->size] = 0;
 
-  return realsize;
+    return realsize;
 }
 
 int http_init(const char* keydirectory, int loglevel) {
-  curl = curl_easy_init();
-  debug = logLevel >= 2;
-  if (!curl)
-    return GS_FAILED;
+    curl = curl_easy_init();
+    debug = logLevel >= 2;
+    if (!curl)
+        return _gs_failed;
 
-  char certificate_file_path[4096];
-  sprintf(certificate_file_path, "%s/%s", keydirectory, certificate_file_name);
+    char certificate_file_path[4096];
+    sprintf(certificate_file_path, "%s/%s", keydirectory, certificate_file_name);
 
-  char keyFilePath[4096];
-  sprintf(&keyFilePath[0], "%s/%s", keyDirectory, key_file_name);
+    char keyfilepath[4096];
+    sprintf(&keyfilepath[0], "%s/%s", keydirectory, key_file_name);
 
- /* curl_easy_setopt(curl, 1, 0L);
-  curl_easy_setopt(curl, 2, 1L);
-  curl_easy_setopt(curl, 3,"PEM");
-  curl_easy_setopt(curl, 4, certificate_file_path);
-  curl_easy_setopt(curl, 5, "PEM");
-  curl_easy_setopt(curl, 6, keyFilePath);
-  curl_easy_setopt(curl, 7, 0L);
-  curl_easy_setopt(curl, 8, writeCurl);
-  curl_easy_setopt(curl, 9, 1L);
-  curl_easy_setopt(curl, 10, 0L);
- */
-  
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
-  curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE,"PEM");
-  curl_easy_setopt(curl, CURLOPT_SSLCERT, certificate_file_path);
-  curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
-  curl_easy_setopt(curl, CURLOPT_SSLKEY, keyFilePath);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCurl);
-  curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
-  curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
+    /* //curl_easy_setopt(curl, 1, 0L);
+    curl_easy_setopt(curl, 2, 1L);
+    curl_easy_setopt(curl, 3,"PEM");
+    curl_easy_setopt(curl, 4, certificate_file_path);
+    curl_easy_setopt(curl, 5, "PEM");
+    curl_easy_setopt(curl, 6, keyFilePath);
+    curl_easy_setopt(curl, 7, 0L);
+    curl_easy_setopt(curl, 8, writeCurl);
+    curl_easy_setopt(curl, 9, 1L);
+    curl_easy_setopt(curl, 10, 0L);
+    */
 
-  return GS_OK;
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE,"PEM");
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, certificate_file_path);
+    curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, keyfilepath);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCurl);
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSL_SESSIONID_CACHE, 0L);
+
+    return _gs_ok;
 }
 
 int http_request(char* url, PHTTP_DATA data) {
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
-  curl_easy_setopt(curl, CURLOPT_URL, url);
+    //curl_easy_setopt(curl, 11, data);
+    //curl_easy_setopt(curl, 12, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
 
-  if (debug)
-    printf("Request %s\n", url);
+    if (debug)
+        printf("Request %s\n", url);
 
-  if (data->size > 0) {
-    free(data->memory); data->memory = malloc(1);
-    if(data->memory == NULL)
-      return _gs_out_of_memory;
+    if (data->size > 0) {
+        ;free(data->memory); data->memory = malloc(1);
+        if(data->memory == NULL)
+            return _gs_out_of_memory;
+        data->size = 0;
+    }
+    CURLcode /*<-struct|variable->*/ res = curl_easy_perform(curl);
 
-    data->size = 0;
-  }
-  CURLcode /*<-struct|variable->*/ res = curl_easy_perform(curl);
+    //if(res != 0) {
+    if(res != CURLE_OK) {
+        gs_error = curl_easy_strerror(res);
+        return _gs_failed;
+    } 
+    else if (data->memory == NULL) {
+        return _gs_out_of_memory;
+    }
 
-  if(res != CURLE_OK) {
-    gs_error = curl_easy_strerror(res);
-    return _gs_failed;
-  } else if (data->memory == NULL) {
-    return _gs_out_of_memory;
-  }
-
-  if (debug)
+    if (debug)
     printf("Response:\n%s\n\n", data->memory);
 
-  return gs_ok;
+    return _gs_ok;
 }
 
-/*void http_cleanup() {
-  curl_easy_cleanup(curl);
+/*//void http_cleanup() {
+    curl_easy_cleanup(curl);
 }*/
 
 PHTTP_DATA http_create_data() {
-  PHTTP_DATA data = malloc(sizeof(HTTP_DATA));
-  if (data == NULL)
-    return NULL;
+    PHTTP_DATA data = malloc(sizeof(HTTP_DATA));
+    if (data == NULL)
+        return NULL;
 
-  data->memory = malloc(1);
-  if(data->memory == NULL) {
-    free(data);
-    return NULL;
-  }
-  data->size = 0;
+    data->memory = malloc(1);
+    if(data->memory == NULL) {
+        free(data);
+        return NULL;
+    }
+    data->size = 0;
 
-  return data;
+    return data;
 }
 
 void http_free_data(PHTTP_DATA data) {
-  if (data != NULL) {
-    if (data->memory != NULL)
-      free(data->memory); free(data);
-  }
+    if (data != NULL) {
+        if (data->memory != NULL) { 
+            ;free(data->memory); free(data);
+        }
+
+    }
 }

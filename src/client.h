@@ -1,5 +1,5 @@
 /*
-  This file is part of Moonlight Embedded.
+//This file is part of Moonlight Embedded.
  
   Copyright (C) 2015-2017 Iwan Timmer
  
@@ -29,16 +29,16 @@
 #define _max_supported_gfe_version 7
 
 typedef struct _SERVER_DATA {
-  const char* address;
-  char* gputype;
-  bool paired;
-  bool supports4k;
-  bool unsupported;
-  int currentgame;
-  int server_major_version;
-  char* gsversion;
-  PDISPLAY_MODE modes;
-  SERVER_INFORMATION  serverinfo;
+    const char* address;
+    char* gputype;
+    bool paired;
+    bool supports4k;
+    bool unsupported;
+    int currentgame;
+    int server_major_version;
+    char* gsversion;
+    PDISPLAY_MODE modes;
+    SERVER_INFORMATION  serverinfo;
 } SERVER_DATA, *PSERVER_DATA;
 
 int gs_init(PSERVER_DATA server, char* address, const char *keydirectory, int loglevel, bool unsupported);

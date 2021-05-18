@@ -1,5 +1,5 @@
 /*
-  This file is part of Moonlight Embedded.
+//This file is part of Moonlight Embedded.
  
   Copyright (C) 2015, 2016 Iwan Timmer
  

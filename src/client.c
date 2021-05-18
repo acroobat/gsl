@@ -1,5 +1,5 @@
-/*
-  This file is part of Moonlight Embedded.
+/* 
+//This file is part of Moonlight Embedded.
  
   Copyright (C) 2015-2017 Iwan Timmer
  
@@ -21,7 +21,7 @@
 #include "parsexml.h"
 #include "mkcert.h"
 #include "client.h"
-#include "errors.h"
+#include "errorlist.h"
 //#include "limits.h"
 
 #include <Limelight.h>
@@ -54,53 +54,54 @@ static EVP_PKEY *privateKey;
 const char* gs_error;
 
 static int mkdirtree(const char* directory) {
-  char buffer[pathmax];
-  char* p = buffer;
+    char buffer[pathmax];
+    char* p = buffer;
 
-  // The passed in string could be a string literal
-  // so we must copy it first
-  strncpy(p, directory, pathmax - 1); buffer[pathmax - 1] = '\0';
+    // The passed in string could be a string literal
+    // so we must copy it first
+    strncpy(p, directory, pathmax - 1); buffer[pathmax - 1] = '\0';
 
-  while (*p != 0) {
-    // Find the end of the path element
-    do {
-      p++;
-    } while (*p != 0 && *p != '/');
+    while (*p != 0) {
+        // Find the end of the path element
+        o {
+          p++;
+        } while (*p != 0 && *p != '/');
 
-    char oldchar = *p;
-    *p = 0;
+        char oldchar = *p;
+        *p = 0;
 
-    // Create the directory if it doesn't exist already
-    if (mkdir(buffer, 0775) == -1 && errno != EEXIST) {
-        return -1;
+        // Create the directory if it doesn't exist already
+        if (mkdir(buffer, 0775) == -1 && errno != EEXIST) {
+            return -1;
+        }
+
+        *p = oldChar;
     }
 
-    *p = oldChar;
-  }
-
-  return 0;
+    return 0;
 }
 
-static int load_unique_id(const char* keyDirectory) {
-  char uniquefilepath[pathmax];
-  snprintf(uniquefilepath, pathmax, "%s/%s", keydirectory, unique_file_name);
+static int load_unique_id(const char* keydirectory) {
+    char uniquefilepath[pathmax];
+    snprintf(uniquefilepath, pathmax, "%s/%s", keydirectory, unique_file_name);
 
-  FILE *fd = fopen(uniquefilepath, "r");
-  if (fd == NULL) {
-    snprintf(unique_id,UNIQUEID_CHARS+1,"0123456789ABCDEF");
+    FILE *fd = fopen(uniquefilepath, "r");
+    if (fd == NULL) {
+        snprintf(unique_id,UNIQUEID_CHARS+1,"0123456789ABCDEF");
 
-    fd = fopen(uniquefilepath, "w");
-    if (fd == NULL)
-      return GS_FAILED;
+        fd = fopen(uniquefilepath, "w");
+        if (fd == NULL)
+            return GS_FAILED;
 
-    fwrite(unique_id, UNIQUEID_CHARS, 1, fd);
-  } else {
-    fread(unique_id, UNIQUEID_CHARS, 1, fd);
-  }
-  fclose(fd);
-  unique_id[UNIQUEID_CHARS] = 0;
+        fwrite(unique_id, UNIQUEID_CHARS, 1, fd);
+    } 
+    else {
+        fread(unique_id, UNIQUEID_CHARS, 1, fd);
+    }
+    fclose(fd);
+    unique_id[UNIQUEID_CHARS] = 0;
 
-  return GS_OK;
+    return _gs_ok;
 }
 
 static int load_cert(const char* keyDirectory) {
@@ -160,7 +161,7 @@ static int load_cert(const char* keyDirectory) {
 
 static int load_server_status(PSERVER_DATA server) {
 
-  uuid_t uuid;
+  uuid_t /*<-struct|variable->*/ uuid;
   char uuid_str[37];
 
   int ret;
@@ -172,9 +173,9 @@ static int load_server_status(PSERVER_DATA server) {
     char *pairedtext = NULL;
     char *currentgametext = NULL;
     char *statetext = NULL;
-    char *servercodecmodesupporttext = NULL;
+    char *server_codec_mode_support_text = NULL;
 
-    ret = gs_invalid;
+    ret = _gs_invalid;
 
     uuid_generate_random(uuid);
     uuid_unparse(uuid, uuid_str);
@@ -184,15 +185,15 @@ static int load_server_status(PSERVER_DATA server) {
     // make another request over HTTP if the HTTPS request fails. We can't just use HTTP
     // for everything because it doesn't accurately tell us if we're paired.
     snprintf(url, sizeof(url), "%s://%s:%d/serverinfo?uniqueid=%s&uuid=%s",
-      i == 0 ? "https" : "http", server->serverInfo.address, i == 0 ? 47984 : 47989, unique_id, uuid_str);
+      i == 0 ? "https" : "http", server->serverinfo.address, i == 0 ? 47984 : 47989, unique_id, uuid_str);
 
     PHTTP_DATA data = http_create_data();
     if (data == NULL) {
-      ret = gs_out_of_memory;
+      ret = _gs_out_of_memory;
       goto cleanup;
     }
-    if (http_request(url, data) != GS_OK) {
-      ret = gs_io_error;
+    if (http_request(url, data) != _gs_ok) {
+      ret = _gs_io_error;
       goto cleanup;
     }
 
@@ -201,23 +202,23 @@ static int load_server_status(PSERVER_DATA server) {
       goto cleanup;
     }
 
-    if (xml_search(data->memory, data->size, "currentgame", &currentGameText) != GS_OK) {
+    if (xml_search(data->memory, data->size, "currentgame", &currentGameText) != _gs_ok) {
       goto cleanup;
     }
 
-    if (xml_search(data->memory, data->size, "PairStatus", &pairedtext) != GS_OK)
+    if (xml_search(data->memory, data->size, "PairStatus", &pairedtext) != _gs_ok)
       goto cleanup;
 
     if (xml_search(data->memory, data->size, "appversion", (char**) &server->serverinfo.server_info_app_version) != _gs_ok)
       goto cleanup;
 
-    if (xml_search(data->memory, data->size, "state", &stateText) != GS_OK)
+    if (xml_search(data->memory, data->size, "state", &statetext) != _gs_ok)
       goto cleanup;
 
-    if (xml_search(data->memory, data->size, "ServerCodecModeSupport", &server_codec_mode_support_text) != GS_OK)
+    if (xml_search(data->memory, data->size, "ServerCodecModeSupport", &server_codec_mode_support_text) != _gs_ok)
       goto cleanup;
 
-    if (xml_search(data->memory, data->size, "gputype", &server->gpuType) != _gs_ok)
+    if (xml_search(data->memory, data->size, "gputype", &server->gputype) != _gs_ok)
       goto cleanup;
 
     if (xml_search(data->memory, data->size, "GsVersion", &server->gsversion) != _gs_ok)
@@ -230,19 +231,19 @@ static int load_server_status(PSERVER_DATA server) {
       goto cleanup;
 
     // These fields are present on all version of GFE that this client supports
-    if (!strlen(current_game_text) || !strlen(pairedtext) || !strlen(server->serverinfo.server_info_app_version) || !strlen(statetext))
+    if (!strlen(current_gametext) || !strlen(pairedtext) || !strlen(server->serverinfo.server_info_app_version) || !strlen(statetext))
       goto cleanup;
 
-    server->paired = pairedText != NULL && strcmp(pairedtext, "1") == 0;
-    server->currentGame = currentGameText == NULL ? 0 : atoi(currentGameText);
+    server->paired = pairedtext != NULL && strcmp(pairedtext, "1") == 0;
+    server->currentgame = current_gametext == NULL ? 0 : atoi(current_gametext);
     server->supports4k = server_codec_mode_support_text != NULL;
-    server->server_major_version = atoi(server->serverinfo.serverinfoappversion);
+    server->server_major_version = atoi(server->serverinfo.server_info_appversion);
 
     if (strstr(statetext, "_SERVER_BUSY") == NULL) {
       // After GFE 2.8, current game remains set even after streaming
       // has ended. We emulate the old behavior by forcing it to zero
       // if streaming is not active.
-      server->currentGame = 0;
+      server->currentgame = 0;
     }
     ret = gs_ok;
 
@@ -260,13 +261,13 @@ static int load_server_status(PSERVER_DATA server) {
       free(server_codec_mode_support_text);
 
     i++;
-  } while (ret != GS_OK && i < 2);
+  } while (ret != _gs_ok && i < 2);
 
   if (ret == _gs_ok && !server->unsupported) {
-    if (server->serverMajorVersion > _max_supported_gfe_version) {
+    if (server->server_major_version > _max_supported_gfe_version) {
       gs_error = "Ensure you're running the latest version of Moonlight Embedded or downgrade GeForce Experience and try again";
       ret = _gs_unsupported_version;
-    } else if (server->serverMajorVersion < _min_supported_gfe_version) {
+    } else if (server->server_major_version < _min_supported_gfe_version) {
       gs_error = "Moonlight Embedded requires a newer version of GeForce Experience. Please upgrade GFE on your PC and try again.";
       ret = _gs_unsupported_version;
     }
@@ -322,7 +323,7 @@ static int sign_it(const char *msg, size_t mlen, unsigned char **sig, size_t *sl
   if (rc != 1 || req != *slen)
     goto cleanup;
 
-  result = GS_OK;
+  result = _gs_ok;
 
   cleanup:
   EVP_MD_CTX_destroy(ctx);
@@ -331,7 +332,7 @@ static int sign_it(const char *msg, size_t mlen, unsigned char **sig, size_t *sl
   return result;
 }
 
-static bool verifySignature(const char *data, int dataLength, char *signature, int signatureLength, const char *cert) {
+static bool verifySignature(const char *data, int datalength, char *signature, int signature_length, const char *cert) {
     X509* x509;
     BIO* bio = BIO_new(BIO_s_mem());
     BIO_puts(bio, cert);
@@ -347,8 +348,8 @@ static bool verifySignature(const char *data, int dataLength, char *signature, i
     EVP_MD_CTX *mdctx = NULL;
     mdctx = EVP_MD_CTX_create();
     EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, pubkey);
-    EVP_DigestVerifyUpdate(mdctx, data, dataLength);
-    int result = EVP_DigestVerifyFinal(mdctx, signature, signatureLength);
+    EVP_DigestVerifyUpdate(mdctx, data, data_length);
+    int result = EVP_DigestVerifyFinal(mdctx, signature, signature_length);
 
     X509_free(x509);
     EVP_PKEY_free(pubkey);
@@ -358,9 +359,9 @@ static bool verifySignature(const char *data, int dataLength, char *signature, i
 }
 
 int gs_unpair(PSERVER_DATA server) {
-  int ret = GS_OK;
+  int ret = _gs_ok;
   char url[4096];
-  uuid_t uuid;
+  uuid_t /*<-struct|variable->*/ uuid;
   char uuid_str[37];
   PHTTP_DATA data = http_create_data();
   if (data == NULL)
@@ -376,10 +377,10 @@ int gs_unpair(PSERVER_DATA server) {
 }
 
 int gs_pair(PSERVER_DATA server, char* pin) {
-  int ret = GS_OK;
+  int ret = _gs_ok;
   char* result = NULL;
   char url[4096];
-  uuid_t uuid;
+  uuid_t /*<-struct|variable->*/ uuid;
   char uuid_str[37];
 
   if (server->paired) {
@@ -399,33 +400,27 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
-  snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&phrase=getservercert&salt=%s&clientcert=%s", server->serverInfo.address, unique_id, uuid_str, salt_hex, cert_hex);
+  snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&phrase=getservercert&salt=%s&clientcert=%s", server->serverinfo.address, unique_id, uuid_str, salt_hex, cert_hex);
   PHTTP_DATA data = http_create_data();
   if (data == NULL)
     return _gs_out_of_memory;
-  else if ((ret = http_request(url, data)) != GS_OK)
-    goto cleanup;
+  else if ((ret = http_request(url, data)) != _gs_ok) goto cleanup;
 
-  if ((ret = xml_status(data->memory, data->size) != GS_OK))
+  if ((ret = xml_status(data->memory, data->size) != _gs_ok))
     goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK)
+  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != _gs_ok)
     goto cleanup;
 
   if (strcmp(result, "1") != 0) {
-    gs_error = "Pairing failed";
-    ret = _gs_failed;
-    goto cleanup;
+    gs_error = "Pairing failed"; ret = _gs_failed; goto cleanup;
   }
 
   free(result);
   result = NULL;
-  if ((ret = xml_search(data->memory, data->size, "plaincert", &result)) != GS_OK)
-    goto cleanup;
+  if ((ret = xml_search(data->memory, data->size, "plaincert", &result)) != _gs_ok) goto cleanup;
 
   if (strlen(result)/2 > 8191) {
-    gs_error = "Server certificate too big";
-    ret = _gs_failed;
-    goto cleanup;
+    gs_error = "Server certificate too big"; ret = _gs_failed; goto cleanup;
   }
 
   char plaincert[8192];
@@ -459,26 +454,26 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
   snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&clientchallenge=%s", server->serverInfo.address, unique_id, uuid_str, challenge_hex);
-  if ((ret = http_request(url, data)) != GS_OK)
+  if ((ret = http_request(url, data)) != _gs_ok)
     goto cleanup;
 
   free(result);
   result = NULL;
-  if ((ret = xml_status(data->memory, data->size) != GS_OK))
+  if ((ret = xml_status(data->memory, data->size) != _gs_ok))
     goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK)
+  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != _gs_ok)
     goto cleanup;
 
   if (strcmp(result, "1") != 0) {
     gs_error = "Pairing failed";
-    ret = GS_FAILED;
+    ret = _gs_failed;
     goto cleanup;
   }
 
   free(result);
   result = NULL;
-  if (xml_search(data->memory, data->size, "challengeresponse", &result) != GS_OK) {
-    ret = GS_INVALID;
+  if (xml_search(data->memory, data->size, "challengeresponse", &result) != _gs_ok) {
+    ret = _gs_invalid;
     goto cleanup;
   }
 
@@ -527,7 +522,7 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 
   free(result);
   result = NULL;
-  if (xml_search(data->memory, data->size, "pairingsecret", &result) != GS_OK) { ret = gs_invalid; goto cleanup;
+  if (xml_search(data->memory, data->size, "pairingsecret", &result) != _gs_ok) { ret = gs_invalid; goto cleanup;
   }
 
   char pairing_secret[16 + 256];
@@ -541,7 +536,7 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 
   unsigned char *signature = NULL;
   size_t s_len;
-  if (sign_it(client_secret_data, 16, &signature, &s_len, privateKey) != GS_OK) {
+  if (sign_it(client_secret_data, 16, &signature, &s_len, privateKey) != _gs_ok) {
       gs_error = "Failed to sign data"; ret = _gs_failed; goto cleanup;
   }
 
@@ -550,12 +545,12 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   uuid_generate_random(uuid);
   uuid_unparse(uuid, uuid_str);
   snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&clientpairingsecret=%s", server->serverInfo.address, unique_id, uuid_str, client_pairing_secret_hex);
-  if ((ret = http_request(url, data)) != GS_OK) goto cleanup;
+  if ((ret = http_request(url, data)) != _gs_ok) goto cleanup;
 
   free(result);
   result = NULL;
-  if ((ret = xml_status(data->memory, data->size) != GS_OK)) goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK) goto cleanup;
+  if ((ret = xml_status(data->memory, data->size) != _gs_ok)) goto cleanup;
+  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != _gs_ok) goto cleanup;
 
   if (strcmp(result, "1") != 0) {
     gs_error = "Pairing failed"; ret = _gs_failed; goto cleanup;
@@ -568,8 +563,8 @@ int gs_pair(PSERVER_DATA server, char* pin) {
 
   free(result);
   result = NULL;
-  if ((ret = xml_status(data->memory, data->size) != GS_OK)) goto cleanup;
-  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != GS_OK) goto cleanup;
+  if ((ret = xml_status(data->memory, data->size) != _gs_ok)) goto cleanup;
+  else if ((ret = xml_search(data->memory, data->size, "paired", &result)) != _gs_ok) goto cleanup;
 
   if (strcmp(result, "1") != 0) {
     gs_error = "Pairing failed"; ret = _gs_failed; goto cleanup;
@@ -578,7 +573,7 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   server->paired = true;
 
   cleanup:
-  if (ret != GS_OK)
+  if (ret != _gs_ok)
     gs_unpair(server);
 
   if (result != NULL) free(result);
@@ -673,8 +668,7 @@ int gs_start_app(PSERVER_DATA server, STREAM_CONFIGURATION *config, int appId, b
   else if ((ret = xml_search(data->memory, data->size, "gamesession", &result)) != _gs_ok)
     goto cleanup;
 
-  if (!strcmp(result, "0")) {
-    ret = _gs_failed;
+  if (!strcmp(result, "0")) { ret = _gs_failed;
     goto cleanup;
   }
 
