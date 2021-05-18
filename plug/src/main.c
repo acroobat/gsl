@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2021 Damir Mukhametshin
+//Copyright (C) 2021 Damir Mukhametshin
  
   Moonlight is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -15,11 +15,11 @@
   along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * const char *var=
- * emp = (struct student*); malloc(sizeof(struct student)); - 1 action
- * event->event_id  - 2 instead of 1
+/* //const char *var=
+ * ;malloc(sizeof(struct student)); malloc(sizeof(struct student)); - 1 action
+ * event->event_id  - 2 in 1
  * #define _gs_ok 0
+ * tabs
  */
 
 /*<-struct|variable->*/
@@ -33,29 +33,26 @@
 #include <mpv/client.h>
 //#include <liblight/client.h>
 
-bool StartsWith(const char *a, const char *b)
-    {
-        if(strncmp(a, b, strlen(b)) == 0) return 1;
+bool StartsWith(const char *a, const char *b) {
+    if(strncmp(a, b, strlen(b)) == 0) return 1;
         return 0;
-    }
+}
 
-int mpv_open_cplugin(mpv_handle /*<-struct|variable->*/ *handle)
-    {
+int mpv_open_cplugin(mpv_handle /*<-struct|variable->*/ *handle) {
         while (1) {
             mpv_event /*<-struct|variable->*/ *event = mpv_wait_event(handle, -1);
             //char* result = NULL;
             char *result = NULL;
             mpv_get_property(handle, "stream-open-filename", 1, &result);
-            if (StartsWith(result, "game://")) 
-                { 
-            printf("%s\n", result);;
+            if (StartsWith(result, "game://")) { 
+            printf("%s\n", result);
             //    mpv_set_option_string(handle, "input-vo-keyboard", "no");
             //    mpv_set_option_string(handle, "terminal", "no");
                 result += 7;
                 char testcmd[100];
                 sprintf(testcmd, "moonlight stream -app %s", result);
                 system(testcmd);
-                }
+            }
             //uncomment at the end
             //else
             //    break;
@@ -63,5 +60,5 @@ int mpv_open_cplugin(mpv_handle /*<-struct|variable->*/ *handle)
             if (event->event_id == 1)
                 break;
         }
-        return 0;
-    }
+    return 0;
+}
