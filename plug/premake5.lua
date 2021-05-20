@@ -1,3 +1,6 @@
+os.execute("mkdir srctest && sed 's/~/*/g' src/main.c > srctest/main.c")
+--os.execute("sed -i srctest/main.c 's/samlerate/sampleRate/g'")
+
 workspace "mainspace"
    configurations { "build" }
 
@@ -6,5 +9,5 @@ project "lightplug"
    language "C"
    targetdir "%{cfg.buildcfg}"
 
-   files { "src/**.h", "src/**.c" }
-   includedirs "liblight"
+   files { "srctest/**.h", "srctest/**.c" }
+--   includedirs "liblight"
