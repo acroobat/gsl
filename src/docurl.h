@@ -1,5 +1,4 @@
-/*
-//This file is part of Moonlight Embedded.
+/*This file is part of Moonlight Embedded.
  
   Copyright (C) 2015 Iwan Timmer
  
@@ -10,12 +9,11 @@
  
   Moonlight is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
  
   You should have received a copy of the GNU General Public License
-  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
- */
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
 
@@ -29,7 +27,7 @@ typedef struct _HTTP_DATA {
     size_t size;
 } HTTP_DATA, *PHTTP_DATA;
 
-int http_init(const char* keydirectory, int logLevel);
-PHTTP_DATA http_create_data();
-int http_request(char* url, PHTTP_DATA data);
-void http_free_data(PHTTP_DATA data);
+int doCurl_Init(const char* keydirectory, int logLevel);
+PHTTP_DATA doCurl_Create_Data();
+int doCurl_Request(char* url, PHTTP_DATA data);
+void doCurl_FreeData(PHTTP_DATA data);

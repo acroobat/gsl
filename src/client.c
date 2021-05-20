@@ -1,5 +1,4 @@
-/* 
-//This file is part of Moonlight Embedded.
+/*This file is part of Moonlight Embedded.
  
   Copyright (C) 2015-2017 Iwan Timmer
  
@@ -10,12 +9,11 @@
  
   Moonlight is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
  
   You should have received a copy of the GNU General Public License
-  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
- */
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 
 #include "http.h"
 #include "parsexml.h"
@@ -127,12 +125,12 @@ static int load_cert(const char* keyDirectory) {
 
   if (fd == NULL) {
     gs_error = "Can't open certificate file";
-    return gs_failed;
+    return _gs_failed;
   }
 
   if (!(cert = PEM_read_X509(fd, NULL, NULL, NULL))) {
     gs_error = "Error loading cert into memory";
-    return gs_failed;
+    return _gs_failed;
   }
 
   rewind(fd);
@@ -583,7 +581,7 @@ int gs_pair(PSERVER_DATA server, char* pin) {
   return ret;
 }
 
-int gs_applist(PSERVER_DATA server, PAPP_LIST *list) {
+int GS_AppList(PSERVER_DATA server, PAPP_LIST *list) {
   int ret = _gs_ok;
   char url[4096];
   uuid_t /*<-struct|variable->*/ uuid;
@@ -606,7 +604,7 @@ int gs_applist(PSERVER_DATA server, PAPP_LIST *list) {
   return ret;
 }
 
-int gs_start_app(PSERVER_DATA server, STREAM_CONFIGURATION *config, int appId, bool sops, bool localaudio, int gamepad_mask) {
+int GS_StartApp(PSERVER_DATA server, STREAM_CONFIGURATION *config, int appId, bool sops, bool localaudio, int gamepad_mask) {
   int ret = _gs_ok;
   uuid_t /*<-struct|variable->*/ uuid;
   char* result = NULL;
@@ -680,7 +678,7 @@ int gs_start_app(PSERVER_DATA server, STREAM_CONFIGURATION *config, int appId, b
   return ret;
 }
 
-int gs_quit_app(PSERVER_DATA server) {
+int GS_QuitApp(PSERVER_DATA server) {
   int ret = _gs_ok;
   char url[4096];
   uuid_t /*<-struct|variable->*/ uuid;
@@ -714,7 +712,7 @@ int gs_quit_app(PSERVER_DATA server) {
   return ret;
 }
 
-int gs_init(PSERVER_DATA server, char *address, const char *keydirectory, int log_level, bool unsupported) {
+int GS_Init(PSERVER_DATA server, char *address, const char *keydirectory, int log_level, bool unsupported) {
   mkdirtree(keydirectory);
   if (load_unique_id(keydirectory) != _gs_ok)
     return _gs_failed;

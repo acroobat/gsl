@@ -1,5 +1,4 @@
-/*
-//This file is part of Moonlight Embedded.
+/*This file is part of Moonlight Embedded.
  
   Copyright (C) 2015 Iwan Timmer
  
@@ -10,12 +9,11 @@
  
   Moonlight is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
  
   You should have received a copy of the GNU General Public License
-  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
- */
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 
 #include "http.h"
 #include "errorlist.h"
@@ -45,7 +43,7 @@ static size_t writeCurl(void *contents, size_t size, size_t nmemb, void *userp) 
     return realsize;
 }
 
-int http_init(const char* keydirectory, int loglevel) {
+int doCurl_Init(const char* keydirectory, int loglevel) {
     curl = curl_easy_init();
     debug = logLevel >= 2;
     if (!curl)
@@ -57,7 +55,7 @@ int http_init(const char* keydirectory, int loglevel) {
     char keyfilepath[4096];
     sprintf(&keyfilepath[0], "%s/%s", keydirectory, key_file_name);
 
-    /* //curl_easy_setopt(curl, 1, 0L);
+    /* curl_easy_setopt(curl, 1, 0L);
     curl_easy_setopt(curl, 2, 1L);
     curl_easy_setopt(curl, 3,"PEM");
     curl_easy_setopt(curl, 4, certificate_file_path);
@@ -66,8 +64,7 @@ int http_init(const char* keydirectory, int loglevel) {
     curl_easy_setopt(curl, 7, 0L);
     curl_easy_setopt(curl, 8, writeCurl);
     curl_easy_setopt(curl, 9, 1L);
-    curl_easy_setopt(curl, 10, 0L);
-    */
+    curl_easy_setopt(curl, 10, 0L);*/
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
@@ -83,7 +80,7 @@ int http_init(const char* keydirectory, int loglevel) {
     return _gs_ok;
 }
 
-int http_request(char* url, PHTTP_DATA data) {
+int doCurl_Request(char* url, PHTTP_DATA data) {
     //curl_easy_setopt(curl, 11, data);
     //curl_easy_setopt(curl, 12, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
@@ -115,11 +112,11 @@ int http_request(char* url, PHTTP_DATA data) {
     return _gs_ok;
 }
 
-/*//void http_cleanup() {
+/*void http_cleanup() {
     curl_easy_cleanup(curl);
 }*/
 
-PHTTP_DATA http_create_data() {
+PHTTP_DATA doCurl_Create_Data() {
     PHTTP_DATA data = malloc(sizeof(HTTP_DATA));
     if (data == NULL)
         return NULL;
@@ -134,7 +131,7 @@ PHTTP_DATA http_create_data() {
     return data;
 }
 
-void http_free_data(PHTTP_DATA data) {
+void doCurl_FreeData(PHTTP_DATA data) {
     if (data != NULL) {
         if (data->memory != NULL) { 
             ;free(data->memory); free(data);

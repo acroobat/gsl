@@ -1,17 +1,15 @@
-/*
-//Moonlight is free software; you can redistribute it and/or modify
+/*Moonlight is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
  
   Moonlight is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
  
   You should have received a copy of the GNU General Public License
-  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
- */
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 
 #include "mkcert.h"
 
@@ -32,9 +30,9 @@ static const int serial = 0;
 static const int num_years = 10;
 
 int mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years);
-int add_ext(X509 *cert, int nid, char *value);
+int addext(X509 *cert, int nid, char *value);
 
-CERT_KEY_PAIR mkcert_generate() {
+CERT_KEY_PAIR mkCert_Generate() {
     BIO *bio_err;
     X509 *x509 = NULL;
     EVP_PKEY *pkey = NULL;
@@ -51,8 +49,9 @@ CERT_KEY_PAIR mkcert_generate() {
     p12 = PKCS12_create("limelight", "GameStream", pkey, x509, NULL, 0, 0, 0, 0, 0);
 
 #ifndef OPENSSL_NO_ENGINE
-    ENGINE_cleanup();
+ENGINE_cleanup();
 #endif
+
     CRYPTO_cleanup_all_ex_data();
 
     BIO_free(bio_err);
@@ -60,13 +59,13 @@ CERT_KEY_PAIR mkcert_generate() {
     return (CERT_KEY_PAIR) {x509, pkey, p12};
 }
 
-void mkcert_free(CERT_KEY_PAIR certkeypair) {
+void mkCert_Free(CERT_KEY_PAIR certkeypair) {
     X509_free(certkeypair.x509);
     EVP_PKEY_free(certkeypair.pkey);
     PKCS12_free(certkeypair.p12);
 }
 
-void mkcert_save(const char* certfile, const char* p12file, const char* keypairfile, CERT_KEY_PAIR certkeypair) {
+void mkCert_Save(const char* certfile, const char* p12file, const char* keypairfile, CERT_KEY_PAIR certkeypair) {
     FILE* certfileptr = fopen(certfile, "w");
     FILE* keypairfileptr = fopen(keypairfile, "w");
     FILE* p12fileptr = fopen(p12file, "wb");
@@ -143,9 +142,9 @@ int mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years) {
     X509_set_issuer_name(x, name);
 
     /* Add various extensions: standard extensions */
-    add_ext(x, NID_key_usage, "critical,digitalSignature,keyEncipherment");
+    addext(x, NID_key_usage, "critical,digitalSignature,keyEncipherment");
 
-    add_ext(x, NID_subject_key_identifier, "hash");
+    addext(x, NID_subject_key_identifier, "hash");
 
     if (!X509_sign(x, pk, EVP_sha256())) {
         goto err;
@@ -163,7 +162,7 @@ err:
  * because we wont reference any other sections.
  */
 
-int add_ext(X509 *cert, int nid, char *value)
+int addext(X509 *cert, int nid, char *value)
 {
     X509_EXTENSION *ex;
     X509V3_CTX ctx;
@@ -179,7 +178,7 @@ int add_ext(X509 *cert, int nid, char *value)
         return 0;
     }
 
-    X509_add_ext(cert, ex, -1);
+    X509_addext(cert, ex, -1);
     X509_EXTENSION_free(ex);
     return 1;
 }

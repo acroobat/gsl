@@ -1,5 +1,4 @@
-/*
-//This file is part of Moonlight Embedded.
+/*This file is part of Moonlight Embedded.
  
   Copyright (C) 2015 Iwan Timmer
  
@@ -10,12 +9,11 @@
  
   Moonlight is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
  
   You should have received a copy of the GNU General Public License
-  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
- */
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <stdio.h>
@@ -33,7 +31,7 @@ typedef struct _DISPLAY_MODE {
     struct _DISPLAY_MODE *next;
 } DISPLAY_MODE, *PDISPLAY_MODE;
 
-int xml_search(char* data, size_t len, char* node, char** result);
-int xml_applist(char* data, size_t len, PAPP_LIST *applist);
-int xml_modelist(char* data, size_t len, PDISPLAY_MODE *modelist);
-int xml_status(char* data, size_t len);
+int ParseXml_Search(char* data, size_t len, char* node, char** result);
+int ParseXml_Applist(char* data, size_t len, PAPP_LIST *applist);
+int ParseXml_Modelist(char* data, size_t len, PDISPLAY_MODE *modelist);
+int ParseXml_Status(char* data, size_t len);

@@ -1,5 +1,4 @@
-/*
-//Created by Diego Waxemberg on 10/16/14.
+/*Created by Diego Waxemberg on 10/16/14.
   Copyright (c) 2014 Limelight Stream. All rights reserved.
  
   Moonlight is free software; you can redistribute it and/or modify
@@ -9,12 +8,11 @@
  
   Moonlight is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
  
   You should have received a copy of the GNU General Public License
-  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.
- */
+  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
 
@@ -27,6 +25,6 @@ typedef struct _CERT_KEY_PAIR {
     PKCS12 *p12;
 } CERT_KEY_PAIR, *PCERT_KEY_PAIR;
 
-CERT_KEY_PAIR mkcert_generate();
-void mkcert_free(CERT_KEY_PAIR);
-void mkcert_save(const char* certfile, const char* p12file, const char* keypairfile, CERT_KEY_PAIR certkeypair);
+CERT_KEY_PAIR mkCert_Generate();
+void mkCert_Free(CERT_KEY_PAIR);
+void mkCert_Save(const char* certfile, const char* p12file, const char* keypairfile, CERT_KEY_PAIR certkeypair);
