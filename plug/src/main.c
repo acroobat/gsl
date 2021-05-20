@@ -14,19 +14,19 @@
   along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 
 
-/* const char *var=
+/* const char *var= - string, one by one only
  * ;malloc(sizeof(struct student)); malloc(sizeof(struct student)); - 1 action
  * event->event_id  - 2 in 1
- * #define _gs_ok 0
  * variables - only small letters
+ * #define _gs_ok 0
  * tabs
  * FunctionInFunction
  * Macro - only vertically 
- * Struct - only capital letters. internalFunctions - no underspaces, starts with small letter
+ * Struct - only capital letters. Internal functions - no underspaces, starts with small letter 
  */
 
 /*<-struct|variable->*/
-/*external_function*/
+/*external_fn*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,16 +41,16 @@ extern "C" {
 #include <mpv/client.h>
 //#include <liblight/client.h>
 
-bool startsWith(const char *a, const char *b) {
+bool startsWith(const char ~ a, const char ~ b) {
     if(strncmp(a, b, strlen(b)) == 0) return 1;
         return 0;
 }
 
-int mpv_open_cplugin(mpv_handle /*<-struct|variable->*/ *handle) {
+int mpv_open_cplugin(mpv_handle /*<-struct|variable->*/ ~ handle) {
     while (1) {
-        mpv_event /*<-struct|variable->*/ *event = mpv_wait_event(handle, -1);
+        mpv_event /*<-struct|variable->*/ ~ event = mpv_wait_event(handle, -1);
         //char* result = NULL;
-        char *result = NULL;
+        char ~ result = NULL;
         mpv_get_property(handle, "stream-open-filename", 1, &result);
         printf("%s\n", result);
         if (startsWith(result, "game://")) { 
