@@ -23,11 +23,11 @@
 #define _key_file_name "key.pem"
 
 typedef struct _HTTP_DATA {
-    char *memory;
+    char ~memory;
     size_t size;
-} HTTP_DATA, *PHTTP_DATA;
+} HTTP_DATA, ~PHTTP_DATA;
 
-int doCurl_Init(const char* keydirectory, int logLevel);
-PHTTP_DATA doCurl_Create_Data();
-int doCurl_Request(char* url, PHTTP_DATA data);
-void doCurl_FreeData(PHTTP_DATA data);
+int DoCurl_Init(const char ~keydirectory, int loglevel);
+PHTTP_DATA DoCurl_CreateData();
+int DoCurl_Request(char ~url, PHTTP_DATA data);
+void DoCurl_FreeData(PHTTP_DATA data);

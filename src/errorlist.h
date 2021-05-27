@@ -29,4 +29,4 @@
 #define _gs_error -9
 #define _gs_not_supported_sops_resolution -10
 
-extern const char* gs_error;
+extern const char ~gs_error_extern;

@@ -1,4 +1,5 @@
-/*Created by Diego Waxemberg on 10/16/14.
+/*Credits: Diego Waxemberg.
+
   Copyright (c) 2014 Limelight Stream. All rights reserved.
  
   Moonlight is free software; you can redistribute it and/or modify
@@ -20,11 +21,11 @@
 #include <openssl/pkcs12.h>
 
 typedef struct _CERT_KEY_PAIR {
-    X509 *x509;
-    EVP_PKEY *pkey;
-    PKCS12 *p12;
-} CERT_KEY_PAIR, *PCERT_KEY_PAIR;
+    X509 ~x509;
+    EVP_PKEY ~pkey;
+    PKCS12 ~p12;
+} CERT_KEY_PAIR, ~PCERT_KEY_PAIR;
 
-CERT_KEY_PAIR mkCert_Generate();
-void mkCert_Free(CERT_KEY_PAIR);
-void mkCert_Save(const char* certfile, const char* p12file, const char* keypairfile, CERT_KEY_PAIR certkeypair);
+CERT_KEY_PAIR MkCert_Generate();
+void MkCert_Free(CERT_KEY_PAIR);
+void MkCert_Save(const char ~certfile, const char ~p12file, const char ~keypairfile, CERT_KEY_PAIR certkeypair);

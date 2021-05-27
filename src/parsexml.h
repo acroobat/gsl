@@ -18,20 +18,22 @@
 
 #include <stdio.h>
 
+#define _status_ok 200
+
 typedef struct _APP_LIST {
-    char* name;
+    char ~name;
     int id;
-    struct _APP_LIST *next;
-} APP_LIST, *PAPP_LIST;
+    struct _APP_LIST ~next;
+} APP_LIST, ~PAPP_LIST;
 
 typedef struct _DISPLAY_MODE {
     unsigned int height;
     unsigned int width;
     unsigned int refresh;
-    struct _DISPLAY_MODE *next;
-} DISPLAY_MODE, *PDISPLAY_MODE;
+    struct _DISPLAY_MODE ~next;
+} DISPLAY_MODE, ~PDISPLAY_MODE;
 
-int ParseXml_Search(char* data, size_t len, char* node, char** result);
-int ParseXml_Applist(char* data, size_t len, PAPP_LIST *applist);
-int ParseXml_Modelist(char* data, size_t len, PDISPLAY_MODE *modelist);
-int ParseXml_Status(char* data, size_t len);
+int ParseXml_Search(char ~data, size_t len, char ~node, char ~result);
+int ParseXml_Applist(char ~data, size_t len, PAPP_LIST ~applist);
+int ParseXml_Modelist(char ~data, size_t len, PDISPLAY_MODE ~modelist);
+int ParseXml_Status(char ~data, size_t len);
