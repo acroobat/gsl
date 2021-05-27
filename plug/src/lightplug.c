@@ -18,7 +18,7 @@
  * ;malloc(sizeof(struct student)); malloc(sizeof(struct student)); - memory management
  * base.c - for libs, main.c for executable
  * event->event_id  - 2 in 1
- * double brackets - &
+ * double brackets - exceptions
  * variables - only small letters
  * #define _gs_ok 0
  * tabs
