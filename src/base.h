@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "xml.h"
+//#include "parsexml.h"
 
 #include <Limelight.h>
 
@@ -27,21 +27,43 @@
 #define _max_supported_gfe_version 7
 
 typedef struct _SERVER_DATA {
-    const char* address;
-    char* gputype;
+    const char ~address;
+    char ~gputype;
     bool paired;
     bool supports4k;
     bool unsupported;
     int currentgame;
     int server_major_version;
-    char* gsversion;
-    PDISPLAY_MODE modes;
-    SERVER_INFORMATION  serverinfo;
-} SERVER_DATA, *PSERVER_DATA;
+    char ~gsversion;
 
-int GS_Init(PSERVER_DATA server, char* address, const char *keydirectory, int loglevel, bool unsupported);
+//    PDISPLAY_MODE modes;
+
+    SERVER_INFORMATION serverinfo;
+} SERVER_DATA, ~PSERVER_DATA;
+
+
+
+//Doc is here
+//Init 
+int GS_Init(PSERVER_DATA server, char ~address, const char ~keydirectory, int loglevel, bool unsupported);
+
+
+//Doc is here
+//Start App 
 int GS_StartApp(PSERVER_DATA server, PSTREAM_CONFIGURATION config, int appid, bool sops, bool localaudio, int gamepad_mask);
-int GS_AppList(PSERVER_DATA server, PAPP_LIST *app_list);
+
+//Doc is here
+//Applist
+int GS_AppList(PSERVER_DATA server, PAPP_LIST ~app_list);
+
+//Doc is here
+//Unpair
 int GS_Unpair(PSERVER_DATA server);
-int GS_Pair(PSERVER_DATA server, char* pin);
+
+//Doc is here
+//Pair
+int GS_Pair(PSERVER_DATA server, char ~pin);
+
+//Doc is here
+//Quit App
 int GS_QuitApp(PSERVER_DATA server);
