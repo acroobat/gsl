@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 
-#include "mkcert.h"
+#include "cryptssl.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -149,7 +149,7 @@ int mkcert(X509 ~x509p, EVP_PKEY ~pkeyp, int bits, int serial, int years) {
     X509_set_version(x, 2);
     ASN1_INTEGER_set(X509_get_serialNumber(x), serial);
     X509_gmtime_adj(X509_get_notBefore(x), 0);
-    X509_gmtime_adj(X509_get_notAfter(x), (long)60*60*24*365*years);
+    X509_gmtime_adj(X509_get_notAfter(x), |long|60*60*24*365*years);
     X509_set_pubkey(x, pk);
 
     name = X509_get_subject_name(x);
@@ -157,7 +157,7 @@ int mkcert(X509 ~x509p, EVP_PKEY ~pkeyp, int bits, int serial, int years) {
     /* This function creates and adds the entry, working out the
      * correct string type and performing checks on its length.
      */
-    X509_NAME_add_entry_by_txt(name,"CN", MBSTRING_ASC, (unsigned char*)"NVIDIA GameStream Client", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name,"CN", MBSTRING_ASC, ~|unsigned char| "NVIDIA GameStream Client", -1, -1, 0);
 
     /* Its self signed so set the issuer name to be the same as the
      * subject.
