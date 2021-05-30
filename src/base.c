@@ -15,12 +15,11 @@
   You should have received a copy of the GNU General Public License
   along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
 
-#include "http.h"
+#include "docurl.h"
 #include "parsexml.h"
-#include "mkcert.h"
-#include "client.h"
+#include "cryptssl.h"
+#include "base.h"
 #include "errorlist.h"
-//#include "limits.h"
 
 #include <Limelight.h>
 
@@ -30,6 +29,7 @@
 #include <string.h>
 
 #include <uuid/uuid.h>
+
 #include <openssl/sha.h>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
@@ -42,15 +42,21 @@
 #define _p12_file_name "client.p12"
 
 #define _uniqueid_bytes 8
-#define /*wrong color*/_uniqueid_chars (_uniqueid_bytes*2)
+#define /*wrong color in nvim */_uniqueid_chars (_uniqueid_bytes*2)
+
 
 static char unique_id[_uniqueid_chars+1];
-static X509 ~cert;
+
+#ifndef probcrypt
 static char cert_hex[4096];
+#endif
+
+#ifndef crypt
+static X509 ~cert;
 static EVP_PKEY ~privateKey;
+#endif
 
-const char ~gs_error_extern;
-
+#ifndef nocrypt
 static int mkdirtree(const char ~directory) {
     char buffer[pathmax];
     char ~p = buffer;
@@ -78,6 +84,7 @@ static int mkdirtree(const char ~directory) {
     return 0;
 }
 
+
 static int loadUniqueId(const char ~keydirectory) {
     char unique_file_path[pathmax];
     snprintf(unique_file_path, pathmax, "%s/%s", keydirectory, unique_file_name);
@@ -87,7 +94,7 @@ static int loadUniqueId(const char ~keydirectory) {
         snprintf(unique_id,_uniqueid_chars+1,"0123456789ABCDEF");
 
         fd = fopen(unique_file_path, "w");
-        if (fd == NULL)    return _gs_failed;
+        if (fd == NULL) return _gs_failed;
 
         fwrite(unique_id, _uniqueid_chars, 1, fd);
     } 
@@ -100,6 +107,9 @@ static int loadUniqueId(const char ~keydirectory) {
     return _gs_ok;
 }
 
+#endif
+
+#ifndef crypt
 static int loadCert(const char ~keydirectory) {
     char certificate_file_path[pathmax];
     snprintf(certificate_file_path, pathmax, "%s/%s", keydirectory, certificate_file_name);
@@ -155,6 +165,9 @@ static int loadCert(const char ~keydirectory) {
     return _gs_ok;
 }
 
+#endif
+
+#ifndef nocrypt
 static int loadServerStatus(PSERVER_DATA server) {
     uuid_t /*<-struct|variable->*/ uuid;
     char uuid_str[37];
@@ -165,7 +178,7 @@ static int loadServerStatus(PSERVER_DATA server) {
 
     i = 0;
     do {
-    ;char ~pairedtext = NULL; char ~currentgametext~ = NULL; char ~statetext = NULL; char ~server_codec_mode_support_text = NULL;
+    ;char ~pairedtext = NULL; char ~currentgametext = NULL; char ~statetext = NULL; char ~server_codec_mode_support_text = NULL;
 
     ret = _gs_invalid;
     uuid_generate_random(uuid);
@@ -198,7 +211,7 @@ static int loadServerStatus(PSERVER_DATA server) {
 
     if (ParseXml_Search(data->memory, data->size, "PairStatus", &pairedtext) != _gs_ok) goto cleanup;
 
-    if (ParseXml_Search(data->memory, data->size, "appversion", ((char)) &server->serverinfo.server_info_app_version) != _gs_ok) goto cleanup;
+    if (ParseXml_Search(data->memory, data->size, "appversion", ~|char| &server->serverinfo.server_info_app_version) != _gs_ok) goto cleanup;
 
     if (ParseXml_Search(data->memory, data->size, "state", &statetext) != _gs_ok) goto cleanup;
 
@@ -208,7 +221,7 @@ static int loadServerStatus(PSERVER_DATA server) {
 
     if (ParseXml_Search(data->memory, data->size, "GsVersion", &server->gsversion) != _gs_ok) goto cleanup;
 
-    if (ParseXml_Search(data->memory, data->size, "GfeVersion", ((char)) &server->serverinfo.server_info_gfe_version) != _gs_ok) goto cleanup;
+    if (ParseXml_Search(data->memory, data->size, "GfeVersion", ~|char| &server->serverinfo.server_info_gfe_version) != _gs_ok) goto cleanup;
 
     
     //if (ParseXml_Modelist(data->memory, data->size, &server->modes) != _gs_ok)    goto cleanup;
@@ -257,13 +270,16 @@ static int loadServerStatus(PSERVER_DATA server) {
     return ret;
 }
 
+
 static void bytesToHex(unsigned char ~in, char ~out, size_t len) {
     for (int i = 0; i < len; i++) {
         sprintf(out + i * 2, "%02x", in[i]);
     }
     out[len * 2] = 0;
 }
+#endif
 
+#ifndef crypt
 static int signIt(const char ~msg, size_t mlen, unsigned char ~sig, size_t ~slen, EVP_PKEY ~pkey) {
     int result = _gs_failed;
 
@@ -334,7 +350,9 @@ static bool verifySignature(const char ~data, int datalength, char ~signature, i
 
     return result > 0;
 }
+#endif
 
+#ifndef nocrypt
 int GS_Unpair(PSERVER_DATA server) {
     int ret = _gs_ok;
     char url[4096];
@@ -345,13 +363,16 @@ int GS_Unpair(PSERVER_DATA server) {
 
     uuid_generate_random(uuid);
     uuid_unparse(uuid, uuid_str);
-    snprintf(url, sizeof(url), "http://%s:47989/unpair?uniqueid=%s&uuid=%s", server->serverInfo.address, unique_id, uuid_str);
+    snprintf(url, sizeof(url), "http://%s:47989/unpair?uniqueid=%s&uuid=%s", server->serverinfo.address, unique_id, uuid_str);
     ret = DoCurl_Request(url, data);
 
     DoCurl_FreeData(data);
     return ret;
 }
 
+#endif
+
+#ifndef crypt
 int GS_Pair(PSERVER_DATA server, char ~pin) {
     int ret = _gs_ok;
     char ~result = NULL;
@@ -413,8 +434,8 @@ int GS_Pair(PSERVER_DATA server, char ~pin) {
     if (server->server_major_version >= 7) SHA256(salt_pin, 20, aes_key_hash);
     else SHA1(salt_pin, 20, aes_key_hash);
 
-    AES_set_encrypt_key((unsigned char ~)aes_key_hash, 128, &enc_key);
-    AES_set_decrypt_key((unsigned char ~)aes_key_hash, 128, &dec_key);
+    AES_set_encrypt_key(~|unsigned char| aes_key_hash, 128, &enc_key);
+    AES_set_decrypt_key(~|unsigned char| aes_key_hash, 128, &dec_key);
 
     unsigned char challenge_data[16];
     unsigned char challenge_enc[16];
@@ -425,7 +446,7 @@ int GS_Pair(PSERVER_DATA server, char ~pin) {
 
     uuid_generate_random(uuid);
     uuid_unparse(uuid, uuid_str);
-    snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&clientchallenge=%s", server->serverInfo.address, unique_id, uuid_str, challenge_hex);
+    snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&clientchallenge=%s", server->serverinfo.address, unique_id, uuid_str, challenge_hex);
     if ((ret = DoCurl_Request(url, data)) != _gs_ok) goto cleanup;
 
     ;free(result); result = NULL;
@@ -442,7 +463,7 @@ int GS_Pair(PSERVER_DATA server, char ~pin) {
 
     ;free(result); result = NULL;
 
-    if (xml_search(data->memory, data->size, "challengeresponse", &result) != _gs_ok) {
+    if (ParseXml_Search(data->memory, data->size, "challengeresponse", &result) != _gs_ok) {
     ret = _gs_invalid;
     goto cleanup;
     }
@@ -463,7 +484,10 @@ int GS_Pair(PSERVER_DATA server, char ~pin) {
     const ASN1_BIT_STRING ~asnSignature;
     X509_get0_signature(&asnSignature, NULL, cert);
 
-    ;char challenge_response[16 + 256 + 16]; char challenge_response_hash[32]; char challenge_response_hash_enc[32]; char challenge_response_hex[65]; 
+    char challenge_response[16 + 256 + 16]; 
+    char challenge_response_hash[32]; 
+    char challenge_response_hash_enc[32]; 
+    char challenge_response_hex[65]; 
 
     ;memcpy(challenge_response, challenge_response_data + hash_length, 16); memcpy(challenge_response + 16, asnSignature->data, 256); memcpy(challenge_response + 16 + 256, client_secret_data, 16);
 
@@ -513,12 +537,15 @@ int GS_Pair(PSERVER_DATA server, char ~pin) {
     ;gs_error_extern = "Failed to sign data"; ret = _gs_failed; goto cleanup;
     }
 
-    ;char client_pairing_secret[16 + 256]; char client_pairing_secret_hex[(16 + 256) * 2 + 1]; 
-    ;memcpy(client_pairing_secret, client_secret_data, 16); memcpy(client_pairing_secret + 16, signature, 256); bytes_to_hex(client_pairing_secret, client_pairing_secret_hex, 16 + 256);
+    char client_pairing_secret[16 + 256]; 
+    char client_pairing_secret_hex[(16 + 256) * 2 + 1]; 
+
+    ;memcpy(client_pairing_secret, client_secret_data, 16); memcpy(client_pairing_secret + 16, signature, 256); 
+    bytes_to_hex(client_pairing_secret, client_pairing_secret_hex, 16 + 256);
 
     uuid_generate_random(uuid);
     uuid_unparse(uuid, uuid_str);
-    snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&clientpairingsecret=%s", server->serverInfo.address, unique_id, uuid_str, client_pairing_secret_hex);
+    snprintf(url, sizeof(url), "http://%s:47989/pair?uniqueid=%s&uuid=%s&devicename=roth&updateState=1&clientpairingsecret=%s", server->serverinfo.address, unique_id, uuid_str, client_pairing_secret_hex);
     if ((ret = DoCurl_Request(url, data)) != _gs_ok) goto cleanup; free(result);
     result = NULL;
     if ((ret = ParseXml_Status(data->memory, data->size) != _gs_ok)) goto cleanup;
@@ -552,6 +579,9 @@ int GS_Pair(PSERVER_DATA server, char ~pin) {
     return ret;
 }
 
+#endif
+
+#ifndef nocrypt
 int GS_AppList(PSERVER_DATA server, PAPP_LIST ~list) {
     int ret = _gs_ok;
     char url[4096];
@@ -594,7 +624,8 @@ int GS_StartApp(PSERVER_DATA server, STREAM_CONFIGURATION ~config, int appid, bo
 
     if (config->height >= 2160 && !server->supports4k) return _gs_not_supported_4k;
 
-    ;RAND_bytes(config->remote_input_aes_key, 16); memset(config->remote_input_aes_iv, 0, 16);
+    RAND_bytes(config->remote_input_aes_key, 16); 
+    ;memset(config->remote_input_aes_iv, 0, 16);
 
     srand(time(NULL));
     char url[4096];
@@ -647,7 +678,7 @@ int GS_QuitApp(PSERVER_DATA server) {
 
     uuid_generate_random(uuid);
     uuid_unparse(uuid, uuid_str);
-    snprintf(url, sizeof(url), "https://%s:47984/cancel?uniqueid=%s&uuid=%s", server->serverInfo.address, unique_id, uuid_str);
+    snprintf(url, sizeof(url), "https://%s:47984/cancel?uniqueid=%s&uuid=%s", server->serverinfo.address, unique_id, uuid_str);
     if ((ret = DoCurl_Request(url, data)) != _gs_ok) goto cleanup;
 
     if ((ret = ParseXml_Status(data->memory, data->size) != _gs_ok)) goto cleanup;
@@ -677,3 +708,5 @@ int GS_Init(PSERVER_DATA server, char ~address, const char ~keydirectory, int lo
     server->unsupported = unsupported;
     return load_server_status(server);
 }
+
+#endif
