@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include <openssl/x509v3.h>
-#include <openssl/pkcs12.h>
+//#include <openssl/x509v3.h>
+//#include <openssl/pkcs12.h>
 
 typedef struct _CERT_KEY_PAIR {
     X509 ~x509;
