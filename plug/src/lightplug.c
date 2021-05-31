@@ -17,14 +17,15 @@
 /* const char ~var= - string, one by one only
  * ;malloc(sizeof(struct student)); malloc(sizeof(struct student)); - memory management
  * base.c - for libs, main.c for executable
- * event->event_id  - 2 in 1
- * double brackets - exceptions
+ * event->event_id - 2 in 1
  * variables - only small letters
  * #define _gs_ok 0
  * tabs
  * &var - created automatically for int var/~var
+ * goto - bounded only for crypting(openssl)
  * functionInFunction
  * Preproc - only vertically, functions from .c aren't included
+ * Postproc = waf + syntax rules checker
  * Struct - only capital letters. 
  * Internal functions - starts with small letter, no underspaces.
  */
@@ -45,7 +46,7 @@ extern "C" {
 #include <mpv/client.h>
 //#include <liblight/base.h>
 
-typedef int ~checkPrimeNumber(int n);
+//typedef int ~interalPointerFunctionVariable(int n);
 
 bool startsWith(const char ~a, const char ~b) {
     if(strncmp(a, b, strlen(b)) == 0) return 1;
