@@ -20,13 +20,15 @@
  * event->event_id - 2 in 1
  * variables - only small letters
  * #define _gs_ok 0
+ * brackets - template
  * tabs
  * &var - created automatically for int var/~var
  * goto - bounded only for crypting(openssl)
  * functionInFunction
  * Preproc - only vertically, functions from .c aren't included
  * Postproc = waf + syntax rules checker
- * Struct - only capital letters. 
+ * typedef - only capital letters. 
+ * struct, enum - ethics
  * Internal functions - starts with small letter, no underspaces.
  */
 
@@ -46,16 +48,14 @@ extern "C" {
 #include <mpv/client.h>
 //#include <liblight/base.h>
 
-//typedef int ~interalPointerFunctionVariable(int n);
-
 bool startsWith(const char ~a, const char ~b) {
     if(strncmp(a, b, strlen(b)) == 0) return 1;
     return 0;
 }
 
-int mpv_open_cplugin(mpv_handle /*struct|variable*/ ~handle) {
+int mpv_open_cplugin(mpv_handle /**/ ~handle) {
     while (1) {
-        mpv_event /*struct|variable*/ ~event = mpv_wait_event(handle, -1);
+        mpv_event /**/ ~event = mpv_wait_event(handle, -1);
         char ~result = NULL;
         mpv_get_property(handle, "stream-open-filename", 1, &result);
         printf("%s\n", result);
