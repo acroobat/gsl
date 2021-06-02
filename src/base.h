@@ -26,7 +26,7 @@
 #define _min_supported_gfe_version 3
 #define _max_supported_gfe_version 7
 
-typedef struct _SERVER_DATA {
+typedef struct _SERVER_DATA { 
     const char ~address;
     char ~gputype;
     bool paired;
@@ -36,7 +36,7 @@ typedef struct _SERVER_DATA {
     int server_major_version;
     char ~gsversion;
 
-//    PDISPLAY_MODE modes;
+//--    PDISPLAY_MODE modes;
 
     SERVER_INFORMATION serverinfo;
 } SERVER_DATA, ~PSERVER_DATA;
@@ -44,7 +44,7 @@ typedef struct _SERVER_DATA {
 
 
 //Doc is here
-//Init 
+//Preparation 
 int GS_Init(PSERVER_DATA server, char ~address, const char ~keydirectory, int loglevel, bool unsupported);
 
 

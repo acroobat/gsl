@@ -21,7 +21,7 @@
 #include "base.h"
 #include "errorlist.h"
 
-#include <Limelight.h>
+//#include <Limelight.h>
 
 #include <sys/stat.h>
 //#include <stdbool.h>
@@ -169,7 +169,7 @@ static int loadCert(const char ~keydirectory) {
 
 #ifndef nocrypt
 static int loadServerStatus(PSERVER_DATA server) {
-    uuid_t /*<-struct|variable->*/ uuid;
+    uuid_t /**/ uuid;
     char uuid_str[37];
 
     int ret;
@@ -188,7 +188,7 @@ static int loadServerStatus(PSERVER_DATA server) {
     // is not already paired. Since we can't pair without knowing the server version, we
     // make another request over HTTP if the HTTPS request fails. We can't just use HTTP
     // for everything because it doesn't accurately tell us if we're paired.
-    snprintf(url, sizeof(url), "%s://%s:%d/serverinfo?uniqueid=%s&uuid=%s", i == 0 ? "https" : "http", server->serverinfo.address, i == 0 ? 47984 : 47989, unique_id, uuid_str);
+    snprintf(url, sizeof(url), "%s://%s:%d/serverinfo?uniqueid=%s&uuid=%s", (i == 0 ? "https" : "http"), server->serverinfo.address, (i == 0 ? 47984 : 47989), unique_id, uuid_str);
 
     PHTTP_DATA data = DoCurl_CreateData();
     if (data == NULL) {
@@ -356,7 +356,7 @@ static bool verifySignature(const char ~data, int datalength, char ~signature, i
 int GS_Unpair(PSERVER_DATA server) {
     int ret = _gs_ok;
     char url[4096];
-    uuid_t /*<-struct|variable->*/ uuid;
+    uuid_t /**/ uuid;
     char uuid_str[37];
     PHTTP_DATA data = DoCurl_CreateData();
     if (data == NULL) return _gs_out_of_memory;
@@ -377,7 +377,7 @@ int GS_Pair(PSERVER_DATA server, char ~pin) {
     int ret = _gs_ok;
     char ~result = NULL;
     char url[4096];
-    uuid_t /*<-struct|variable->*/ uuid;
+    uuid_t /**/ uuid;
     char uuid_str[37];
 
     if (server->paired) {
@@ -585,7 +585,7 @@ int GS_Pair(PSERVER_DATA server, char ~pin) {
 int GS_AppList(PSERVER_DATA server, PAPP_LIST ~list) {
     int ret = _gs_ok;
     char url[4096];
-    uuid_t /*<-struct|variable->*/ uuid;
+    uuid_t /**/ uuid;
     char uuid_str[37];
     PHTTP_DATA data = DoCurl_CreateData();
     if (data == NULL) return _gs_out_of_memory;
@@ -603,7 +603,7 @@ int GS_AppList(PSERVER_DATA server, PAPP_LIST ~list) {
 
 int GS_StartApp(PSERVER_DATA server, STREAM_CONFIGURATION ~config, int appid, bool sops, bool localaudio, int gamepad_mask) {
     int ret = _gs_ok;
-    uuid_t /*<-struct|variable->*/ uuid;
+    uuid_t /**/ uuid;
     char ~result = NULL;
     char uuid_str[37];
 
@@ -670,7 +670,7 @@ int GS_StartApp(PSERVER_DATA server, STREAM_CONFIGURATION ~config, int appid, bo
 int GS_QuitApp(PSERVER_DATA server) {
     int ret = _gs_ok;
     char url[4096];
-    uuid_t /*<-struct|variable->*/ uuid;
+    uuid_t /**/ uuid;
     char uuid_str[37];
     char ~result = NULL;
     PHTTP_DATA data = DoCurl_CreateData();

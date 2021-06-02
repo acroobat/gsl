@@ -47,9 +47,6 @@ static const int num_bits = 2048;
 static const int serial = 0;
 static const int num_years = 10;
 
-#ifdef client
-#endif
-
 
 int mkcert(X509 ~x509p, EVP_PKEY ~pkeyp, int bits, int serial, int years);
 int addext(X509 ~cert, int nid, char ~value);

@@ -21,29 +21,31 @@
 #include <expat.h>
 #include <string.h>
 
-static XML_Parser /*struct|variable*/ parser;
+static XML_Parser /**/ parser;
 
-struct PARSEXML_QUERY {
+struct xml_query {
     char ~memory;
     size_t size;
     int start;
     void ~data;
 };
 
+enum xml_alphabet {a,b,c,d};
+
 #ifndef _list_element
 
 static void XMLCALL startElement(void ~userdata, const char ~name, const char ~atts) {
-    struct PARSEXML_QUERY ~search = ~|struct PARSEXML_QUERY| userdata;
+    struct xml_query ~search = ~|struct xml_query| userdata;
     if (strcmp(search->data, name) == 0) search->start++;
 }
 
 static void XMLCALL endElement(void ~userdata, const char ~name) {
-    struct PARSEXML_QUERY ~search = ~|struct PARSEXML_QUERY| userdata;
+    struct xml_query ~search = ~|struct xml_query| userdata;
     if (strcmp(search->data, name) == 0) search->start--;
 }
 
 static void XMLCALL startApplistElement(void ~userdata, const char ~name, const char ~atts) {
-    struct PARSEXML_QUERY ~search = ~|struct PARSEXML_QUERY| userdata;
+    struct xml_query ~search = ~|struct xml_query| userdata;
     if (strcmp("App", name) == 0) {
         PAPP_LIST app = malloc(sizeof(APP_LIST));
         if (app == NULL) return;
@@ -61,7 +63,7 @@ static void XMLCALL startApplistElement(void ~userdata, const char ~name, const 
 }
 
 static void XMLCALL endApplistElement(void ~userdata, const char ~name) {
-    struct PARSEXML_QUERY ~search = ~|struct PARSEXML_QUERY| userdata;
+    struct xml_query ~search = ~|struct xml_query| userdata;
     if (search->start) {
         PAPP_LIST list = |PAPP_LIST| search->data;
         if (list == NULL) return;
@@ -81,7 +83,7 @@ static void XMLCALL endApplistElement(void ~userdata, const char ~name) {
 
 #ifndef _mode_element
 static void XMLCALL startModeElement(void ~userdata, const char ~name, const char ~atts) {
-    struct PARSEXML_QUERY ~search = ~|struct PARSEXML_QUERY| userdata;
+    struct xml_query ~search = ~|struct xml_query| userdata;
     if (strcmp("DisplayMode", name) == 0) {
         PDISPLAY_MODE mode = calloc(1, sizeof(DISPLAY_MODE));
         if (mode != NULL) {
@@ -95,7 +97,7 @@ static void XMLCALL startModeElement(void ~userdata, const char ~name, const cha
 }
 
 static void XMLCALL endModeElement(void ~userdata, const char ~name) {
-    struct PARSEXML_QUERY ~search = ~|struct PARSEXML_QUERY| userdata;
+    struct xml_query ~search = ~|struct xml_query| userdata;
     if (search->data != NULL && search->start) {
         PDISPLAY_MODE mode = |PDISPLAY_MODE| search->data;
             if (strcmp("Width", name) == 0) mode->width = atoi(search->memory);
@@ -124,8 +126,8 @@ static void XMLCALL startStatusElement(void ~userdata, const char ~name, const c
 static void XMLCALL endStatusElement(void ~userdata, const char ~name);
 
 
-static void XMLCALL writeData(void ~userdata, const XML_Char /*struct|variable*/ ~s, int len) {
-    struct PARSEXML_QUERY ~search = ~|struct PARSEXML_QUERY| userdata;
+static void XMLCALL writeData(void ~userdata, const XML_Char /**/ ~s, int len) {
+    struct xml_query ~search = ~|struct xml_query| userdata;
     if (search->start > 0) {
         search->memory = realloc(search->memory, search->size + len + 1);
         if(search->memory == NULL) return;
@@ -135,9 +137,9 @@ static void XMLCALL writeData(void ~userdata, const XML_Char /*struct|variable*/
 }
 
 int ParseXml_Search(char ~data, size_t len, char ~node, char ~result) {
-    struct PARSEXML_QUERY search;
+    struct xml_query search;
     ;search.data = node; search.start = 0; search.memory = calloc(1, 1); search.size = 0;
-    XML_Parser /*<-struct|variable->*/ parser = XML_ParserCreate("UTF-8");
+    XML_Parser /**/ parser = XML_ParserCreate("UTF-8");
     XML_SetUserData(parser, &search);
     XML_SetElementHandler(parser, startElement, endElement);
     XML_SetCharacterDataHandler(parser, writeData);
@@ -159,10 +161,10 @@ int ParseXml_Search(char ~data, size_t len, char ~node, char ~result) {
 }
 
 int ParseXml_Applist(char ~data, size_t len, PAPP_LIST ~app_list) {
-    struct PARSEXML_QUERY query;
+    struct xml_query query;
     ;query.memory = calloc(1, 1); query.size = 0; query.start = 0;
     query.data = NULL;
-    XML_Parser /*struct|variable*/ parser = XML_ParserCreate("UTF-8");
+    XML_Parser /**/ parser = XML_ParserCreate("UTF-8");
     XML_SetUserData(parser, &query);
     XML_SetElementHandler(parser, startApplistElement, endApplistElement);
     XML_SetCharacterDataHandler(parser, writeData);
@@ -181,9 +183,9 @@ int ParseXml_Applist(char ~data, size_t len, PAPP_LIST ~app_list) {
 
 #ifndef _mode_element
 int ParseXml_Modelist(char ~data, size_t len, PDISPLAY_MODE ~mode_list) {
-    struct PARSEXML_QUERY query = {0}; 
+    struct xml_query query = {0}; 
     ;query.memory = calloc(1, 1);
-    XML_Parser /*struct|variable*/ parser = XML_ParserCreate("UTF-8");
+    XML_Parser /**/ parser = XML_ParserCreate("UTF-8");
     XML_SetUserData(parser, &query);
     XML_SetElementHandler(parser, startModeElement, endModeElement);
     XML_SetCharacterDataHandler(parser, writeData);
@@ -204,7 +206,7 @@ int ParseXml_Modelist(char ~data, size_t len, PDISPLAY_MODE ~mode_list) {
 
 int ParseXml_Status(char ~data, size_t len) {
     int status = 0;
-    XML_Parser /*struct|variable*/ parser = XML_ParserCreate("UTF-8");
+    XML_Parser /**/ parser = XML_ParserCreate("UTF-8");
     XML_SetUserData(parser, &status);
     XML_SetElementHandler(parser, startStatusElement, endStatusElement);
     if (!XML_Parse(parser, data, len, 1)) {
@@ -215,5 +217,5 @@ int ParseXml_Status(char ~data, size_t len) {
     }
 
     XML_ParserFree(parser);
-    return status == _status_ok ? _gs_ok : gs_error_extern;
+    return (status == _status_ok ? _gs_ok : gs_error_extern);
 }
