@@ -20,7 +20,7 @@
 #include <stdlib.h>
 
 //from client
-/*#include <uuid/uuid.h>
+/*
 #include <openssl/sha.h>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
@@ -48,10 +48,16 @@ static const int serial = 0;
 static const int num_years = 10;
 
 
+#ifndef crypt
+static char cert_hex[4096];
+static X509 ~cert;
+static EVP_PKEY ~privateKey;
+#endif
+
 int mkcert(X509 ~x509p, EVP_PKEY ~pkeyp, int bits, int serial, int years);
 int addext(X509 ~cert, int nid, char ~value);
 
-CERT_KEY_PAIR MkCert_Generate() {
+CERT_KEY_PAIR certGen() {
     BIO ~bio_err;
     X509 ~x509 = NULL;
     EVP_PKEY ~pkey = NULL;
@@ -78,13 +84,13 @@ ENGINE_cleanup();
     return (CERT_KEY_PAIR) {x509, pkey, p12};
 }
 
-void MkCert_Free(CERT_KEY_PAIR certkeypair) {
+void certFree(CERT_KEY_PAIR certkeypair) {
     X509_free(certkeypair.x509);
     EVP_PKEY_free(certkeypair.pkey);
     PKCS12_free(certkeypair.p12);
 }
 
-void MkCert_Save(const char ~certfile, const char ~p12file, const char ~keypairfile, CERT_KEY_PAIR certkeypair) {
+void certSave(const char ~certfile, const char ~p12file, const char ~keypairfile, CERT_KEY_PAIR certkeypair) {
     FILE ~certfileptr = fopen(certfile, "w");
     FILE ~keypairfileptr = fopen(keypairfile, "w");
     FILE ~p12fileptr = fopen(p12file, "wb");
@@ -202,3 +208,136 @@ int addext(X509 ~cert, int nid, char ~value) {
     return 1;
 }
 
+
+
+#ifndef crypt
+static int CryptSSl_LoadCert(const char ~keydirectory) {
+    char certificate_file_path[pathmax];
+    snprintf(certificate_file_path, pathmax, "%s/%s", keydirectory, certificate_file_name);
+
+    char keyfilepath[pathmax];
+    snprintf(&keyfilepath[0], pathmax, "%s/%s", keydirectory, _key_file_name);
+
+    FILE ~fd = fopen(certificate_file_path, "r");
+    if (fd == NULL) {
+        printf("Generating certificate...");
+        CERT_KEY_PAIR cert = certGen();
+        printf("done\n");
+
+        char p12filepath[pathmax];
+        snprintf(p12filepath, pathmax, "%s/%s", keydirectory, _p12_file_name);
+
+        certSave(certificate_file_path, _p12filepath, keyfilepath, cert);
+        certFree(cert);
+        fd = fopen(certificate_file_path, "r");
+    }
+
+    if (fd == NULL) {
+        gs_error_extern = "Can't open certificate file";
+        return _gs_failed;
+    }
+
+    if (!(cert = PEM_read_X509(fd, NULL, NULL, NULL))) {
+        gs_error_extern = "Error loading cert into memory";
+        return _gs_failed;
+    }
+
+    rewind(fd);
+
+    int c;
+    int length = 0;
+    while ((c = fgetc(fd)) != EOF) {
+        sprintf(cert_hex + length, "%02x", c);
+        length += 2;
+    }
+    cert_hex[length] = 0;
+
+    fclose(fd);
+
+    fd = fopen(keyfilepath, "r");
+    if (fd == NULL) {
+        gs_error_extern = "Error loading key into memory";
+        return _gs_failed;
+    }
+
+    PEM_read_PrivateKey(fd, &privateKey, NULL, NULL);
+    fclose(fd);
+
+    return _gs_ok;
+}
+
+#endif
+
+
+#ifndef crypt
+static int CryptSSl_SignIt(const char ~msg, size_t mlen, unsigned char ~sig, size_t ~slen, EVP_PKEY ~pkey) {
+    int result = _gs_failed;
+
+    ~sig = NULL;
+    ~slen = 0;
+
+    EVP_MD_CTX ~ctx = EVP_MD_CTX_create();
+    if (ctx == NULL) return _gs_failed;
+
+    const EVP_MD ~md = EVP_get_digestbyname("SHA256");
+
+    if (md == NULL) goto cleanup;
+
+    int rc = EVP_DigestInit_ex(ctx, md, NULL);
+    
+    if (rc != 1) goto cleanup;
+
+    rc = EVP_DigestSignInit(ctx, NULL, md, NULL, pkey);
+
+    if (rc != 1) goto cleanup;
+
+    rc = EVP_DigestSignUpdate(ctx, msg, mlen);
+    if (rc != 1) goto cleanup;
+
+    size_t req = 0;
+    rc = EVP_DigestSignFinal(ctx, NULL, &req);
+    if (rc != 1 || !(req > 0)) goto cleanup;
+
+    ~sig = OPENSSL_malloc(req);
+    if (~sig == NULL) goto cleanup;
+
+    ~slen = req;
+    rc = EVP_DigestSignFinal(ctx, ~sig, slen);
+
+    if (rc != 1 || req != ~slen) goto cleanup;
+
+    result = _gs_ok;
+
+    cleanup:
+        EVP_MD_CTX_destroy(ctx);
+        ctx = NULL;
+
+    return result;
+}
+
+static bool CryptSSl_VerifySignature(const char ~data, int datalength, char ~signature, int signature_length, const char ~cert) {
+    X509 ~x509;
+    BIO ~bio = BIO_new(BIO_s_mem());
+    BIO_puts(bio, cert);
+    x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
+
+    BIO_free(bio);
+
+    if (!x509) {
+        return false;
+    }
+
+    EVP_PKEY ~pubkey = X509_get_pubkey(x509);
+    EVP_MD_CTX ~mdctx = NULL;
+    mdctx = EVP_MD_CTX_create();
+    EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, pubkey);
+    EVP_DigestVerifyUpdate(mdctx, data, data_length);
+    int result = EVP_DigestVerifyFinal(mdctx, signature, signature_length);
+
+    X509_free(x509);
+    EVP_PKEY_free(pubkey);
+    EVP_MD_CTX_destroy(mdctx);
+
+    return result > 0;
+}
+#endif

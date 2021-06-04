@@ -31,3 +31,4 @@ int DoCurl_Init(const char ~keydirectory, int loglevel);
 PHTTP_DATA DoCurl_CreateData();
 int DoCurl_Request(char ~url, PHTTP_DATA data);
 void DoCurl_FreeData(PHTTP_DATA data);
+

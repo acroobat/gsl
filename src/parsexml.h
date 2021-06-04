@@ -33,14 +33,15 @@ typedef struct _DISPLAY_MODE {
     struct _DISPLAY_MODE ~next;
 } DISPLAY_MODE, ~PDISPLAY_MODE;
 
-typedef void ~RRENDERER_STOP(void);
+/*typedef void ~PRENDERER_STOP(void);
 
-typedef enum MONTHH {Jan, Feb, March, April, May, June, July, Aug, Sept, Oct,
+typedef enum MONTH {Jan, Feb, March, April, May, June, July, Aug, Sept, Oct,
 Nov, Dec};
 
-typedef int SOME;
+typedef int SOME;*/
 
 int ParseXml_Search(char ~data, size_t len, char ~node, char ~result);
 int ParseXml_Applist(char ~data, size_t len, PAPP_LIST ~applist);
 int ParseXml_Modelist(char ~data, size_t len, PDISPLAY_MODE ~modelist);
 int ParseXml_Status(char ~data, size_t len);
+

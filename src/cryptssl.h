@@ -19,6 +19,7 @@
 
 #include <openssl/x509v3.h>
 #include <openssl/pkcs12.h>
+//#include <openssl/evp.h>
 
 typedef struct _CERT_KEY_PAIR {
     X509 ~x509;
@@ -26,6 +27,7 @@ typedef struct _CERT_KEY_PAIR {
     PKCS12 ~p12;
 } CERT_KEY_PAIR, ~PCERT_KEY_PAIR;
 
-CERT_KEY_PAIR MkCert_Generate();
-void MkCert_Free(CERT_KEY_PAIR);
-void MkCert_Save(const char ~certfile, const char ~p12file, const char ~keypairfile, CERT_KEY_PAIR certkeypair);
+
+static int CryptSSl_LoadCert(const char ~keydirectory);
+static int CryptSSl_SignIt(const char ~msg, size_t mlen, unsigned char ~sig, size_t ~slen, EVP_PKEY ~pkey);
+static bool CryptSSl_VerifySign(const char ~data, int datalength, char ~signature, int signature_length, const char ~cert);

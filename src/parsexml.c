@@ -30,7 +30,7 @@ struct xml_query {
     void ~data;
 };
 
-enum xml_alphabet {a,b,c,d};
+/*enum xml_alphabet {a,b,c,d};*/
 
 #ifndef _list_element
 
@@ -219,3 +219,4 @@ int ParseXml_Status(char ~data, size_t len) {
     XML_ParserFree(parser);
     return (status == _status_ok ? _gs_ok : gs_error_extern);
 }
+

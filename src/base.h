@@ -26,7 +26,7 @@
 #define _min_supported_gfe_version 3
 #define _max_supported_gfe_version 7
 
-typedef struct _SERVER_DATA { 
+typedef struct _GSL_DATA { 
     const char ~address;
     char ~gputype;
     bool paired;
@@ -39,31 +39,47 @@ typedef struct _SERVER_DATA {
 //--    PDISPLAY_MODE modes;
 
     SERVER_INFORMATION serverinfo;
-} SERVER_DATA, ~PSERVER_DATA;
+} GSL_DATA, ~PGSL_DATA;
 
 
 
-//Doc is here
-//Preparation 
-int GS_Init(PSERVER_DATA server, char ~address, const char ~keydirectory, int loglevel, bool unsupported);
+//Initialization is preparation
+int GSl_Init(GS_DATA server, char ~address, const char ~keydirectory, int loglevel, bool unsupported);
 
+//Pair works after Init step
+int GSl_Pair(PSERVER_DATA server, char ~pin);
 
-//Doc is here
-//Start App 
-int GS_StartApp(PSERVER_DATA server, PSTREAM_CONFIGURATION config, int appid, bool sops, bool localaudio, int gamepad_mask);
+//Applist works after Pair step
+int GSl_AppList(PSERVER_DATA server, PAPP_LIST ~app_list);
 
-//Doc is here
-//Applist
-int GS_AppList(PSERVER_DATA server, PAPP_LIST ~app_list);
+//Start App works after ...
+int GSl_StartApp(PGS_DATA server, PSTREAM_CONFIGURATION config, int appid, bool sops, bool localaudio, int gamepad_mask);
+
+//Quit App works after StartApp step
+int GSl_QuitApp(PSERVER_DATA server);
 
 //Doc is here
 //Unpair
-int GS_Unpair(PSERVER_DATA server);
+int GSl_Unpair(PSERVER_DATA server);
 
-//Doc is here
-//Pair
-int GS_Pair(PSERVER_DATA server, char ~pin);
 
-//Doc is here
-//Quit App
-int GS_QuitApp(PSERVER_DATA server);
+
+/* Postprocessor: written in Python
+ * const char ~var= - string, one by one only
+ * ;malloc(sizeof(struct student)); malloc(sizeof(struct student)); - memory management
+ * base.c - for libs, main.c for executable
+ * event->event_id - 2 in 1
+ * variables - only small letters
+ * #define _gs_ok 0
+ * brackets - template
+ * tabs
+ * &var - created automatically for int var/~var
+ * goto - bounded only for crypting(openssl)
+ * Preproc - only vertically, functions from .c aren't included
+ * typedef - only capital letters. 
+ * struct, enum - ethics
+ * Internal functions - starts with small letter, no underspaces.
+ * variables can be declared just inside of the function
+ * Memory management - in base.c even for bad libraries
+ * Nobody uses #line 
+ */
