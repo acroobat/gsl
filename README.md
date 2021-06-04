@@ -1,4 +1,4 @@
-# WIP liblight
+# WIP gamestream library
 Fork of libgamestream (part of https://github.com/irtimmer/moonlight-embedded/)
 
 <b>Requirements:</b>
