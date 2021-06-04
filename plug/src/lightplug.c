@@ -1,44 +1,3 @@
-/*Copyright (C) 2021 Damir Mukhametshin
- 
-  Moonlight is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
- 
-  Moonlight is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.
- 
-  You should have received a copy of the GNU General Public License
-  along with Moonlight; if not, see <http://www.gnu.org/licenses/>.*/
-
-
-/* const char ~var= - string, one by one only
- * ;malloc(sizeof(struct student)); malloc(sizeof(struct student)); - memory management
- * base.c - for libs, main.c for executable
- * event->event_id - 2 in 1
- * variables - only small letters
- * #define _gs_ok 0
- * brackets - template
- * tabs
- * &var - created automatically for int var/~var
- * goto - bounded only for crypting(openssl)
- * functionInFunction
- * Preproc - only vertically, functions from .c aren't included
- * Postproc = waf + syntax rules checker
- * typedef - only capital letters. 
- * struct, enum - ethics
- * Internal functions - starts with small letter, no underspaces.
- */
-
-/*struct|variable*/
-/*external_fn*/
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,17 +5,25 @@ extern "C" {
 #include <string.h>
 
 #include <mpv/client.h>
-//#include <liblight/base.h>
 
-bool startsWith(const char ~a, const char ~b) {
+#include <libgslight/base.h>
+#include <libgslight/base.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+bool startsWith(const char *a, const char *b) {
     if(strncmp(a, b, strlen(b)) == 0) return 1;
     return 0;
 }
 
-int mpv_open_cplugin(mpv_handle /**/ ~handle) {
+int mpv_open_cplugin(mpv_handle *handle) {
+    //GSlight_Init()
+    //GSlight_Applist()
     while (1) {
-        mpv_event /**/ ~event = mpv_wait_event(handle, -1);
-        char ~result = NULL;
+        mpv_event *event = mpv_wait_event(handle, -1);
+        char *result = NULL;
         mpv_get_property(handle, "stream-open-filename", 1, &result);
         printf("%s\n", result);
         if (startsWith(result, "game://")) { 
@@ -79,3 +46,4 @@ int mpv_open_cplugin(mpv_handle /**/ ~handle) {
 #ifdef __cplusplus
 }
 #endif
+
