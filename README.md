@@ -1,4 +1,4 @@
-# WIP gamestream library
+# Gsl engine
 Fork of libgamestream (part of https://github.com/irtimmer/moonlight-embedded/)
 
 <b>Requirements:</b>
@@ -6,6 +6,10 @@ Fork of libgamestream (part of https://github.com/irtimmer/moonlight-embedded/)
 <li>moonlight-common-c</li>
 </ul>
 
-# WIP lightplug
+# lightplug
 
-Cplugin for mpv
+C plugin for mpv
+
+Move here `/home/user/.config/mpv/scripts`
+
+WIP [How-to](https://github.com/acroobat/gsl/wiki) instruction(s) here
